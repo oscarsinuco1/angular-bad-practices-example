@@ -29,7 +29,8 @@ module.exports = function (config) {
       reporters: [
         { type: 'html' },
         { type: 'text-summary' },
-        { type: 'lcov' }
+        { type: 'lcov' },
+        { type: 'json-summary' }
       ]
     },
     // Add JUnit reporter configuration
