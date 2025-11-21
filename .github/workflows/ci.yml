@@ -32,7 +32,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: node-modules-artifact
-          path: node_modules
+          path: .
           retention-days: 1 
 
   # JOB 2: COMPILACIÓN (BUILD)
