@@ -12,54 +12,22 @@ on:
       - master
 
 jobs:
-  # JOB 1: INSTALACIÓN DE DEPENDENCIAS
-  install_dependencies:
-    name: 1. Install Dependencies
+  # JOB 1: COMPILACIÓN (BUILD)
+  build_app:
+    name: 1. Build Application
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        
+
       - name: Setup Node.js Environment (22.12.0)
         uses: actions/setup-node@v4
         with:
           node-version: '22.12.0'
+          cache: 'npm'
 
       - name: Install Dependencies
-        run: npm install
-      
-      - name: Upload node_modules Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: node-modules-artifact
-          path: .
-          retention-days: 1 
-
-  # JOB 2: COMPILACIÓN (BUILD)
-  build_app:
-    name: 2. Build Application
-    runs-on: ubuntu-latest
-    needs: install_dependencies
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js Environment (22.12.0)
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22.12.0'
-
-      - name: Download node_modules Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: node-modules-artifact
-          path: .
-
-      - name: Validate node_modules
-        run: ls -R node_modules/.bin || echo "bin folder missing"
-
-      - name: Install angular
-        run: npm install @angular/cli@20 -g
+        run: npm ci
 
       - name: Run Build
         run: npm run build
@@ -71,11 +39,10 @@ jobs:
           path: dist/bad-practices-project
           retention-days: 1
 
-  # JOB 3: EJECUCIÓN DE PRUEBAS (TESTS)
+  # JOB 2: EJECUCIÓN DE PRUEBAS (TESTS)
   run_tests:
-    name: 3. Run Unit Tests
+    name: 2. Run Unit Tests
     runs-on: ubuntu-latest
-    needs: build_app
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -84,12 +51,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22.12.0'
+          cache: 'npm'
 
-      - name: Download node_modules Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: node-modules-artifact
-          path: node_modules
+      - name: Install Dependencies
+        run: npm ci
           
       - name: Run Tests and Generate Coverage Report
         run: |
@@ -103,9 +68,9 @@ jobs:
           path: coverage
           retention-days: 1
           
-  # JOB 4: ESCANEO SONARCLOUD
+  # JOB 3: ESCANEO SONARCLOUD
   sonar_scan_code:
-    name: 4. SonarCloud Scan & Normalization
+    name: 3. SonarCloud Scan & Normalization
     runs-on: ubuntu-latest
     needs: run_tests
     outputs:
@@ -126,7 +91,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: coverage-artifact
-          path: .
+          path: coverage
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2.2.0
