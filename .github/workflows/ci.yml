@@ -26,23 +26,20 @@ jobs:
           node-version: '22.12.0'
 
       - name: Install Dependencies
-        # Instala las dependencias y prepara el cache.
         run: npm install
       
       - name: Upload node_modules Artifact
-        # Sube la carpeta node_modules para que el siguiente Job la reutilice.
         uses: actions/upload-artifact@v4
         with:
           name: node-modules-artifact
           path: node_modules
-          # Se usa el SHA del commit como un identificador único para el artifact
           retention-days: 1 
 
   # JOB 2: COMPILACIÓN (BUILD)
   build_app:
     name: 2. Build Application
     runs-on: ubuntu-latest
-    needs: install_dependencies # Depende del Job 1
+    needs: install_dependencies
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -53,17 +50,18 @@ jobs:
           node-version: '22.12.0'
 
       - name: Download node_modules Artifact
-        # Descarga las dependencias pre-instaladas del Job 1.
         uses: actions/download-artifact@v4
         with:
           name: node-modules-artifact
-          path: .
-          
+          path: node_modules
+
+      - name: Validate node_modules
+        run: ls -R node_modules/.bin || echo "bin folder missing"
+
       - name: Run Build
         run: npx ng build --configuration production
         
       - name: Upload Dist Folder Artifact
-        # Sube la carpeta 'dist/bad-practices-project' (Angular 18+ usa esta estructura)
         uses: actions/upload-artifact@v4
         with:
           name: dist-artifact
@@ -74,7 +72,7 @@ jobs:
   run_tests:
     name: 3. Run Unit Tests
     runs-on: ubuntu-latest
-    needs: build_app # Depende del Job 2
+    needs: build_app
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -85,21 +83,17 @@ jobs:
           node-version: '22.12.0'
 
       - name: Download node_modules Artifact
-        # Descarga las dependencias pre-instaladas.
         uses: actions/download-artifact@v4
         with:
           name: node-modules-artifact
-          path: .
+          path: node_modules
           
       - name: Run Tests and Generate Coverage Report
-        # Ya usa NPX, lo cual es correcto para binarios locales.
         run: |
           echo "Running unit tests and generating coverage report..."
-          # Genera el reporte LCOV en la carpeta 'coverage/'
           npx ng test --no-watch --code-coverage || true
 
       - name: Upload Coverage Artifact
-        # Sube el reporte de cobertura LCOV para que Sonar lo use.
         uses: actions/upload-artifact@v4
         with:
           name: coverage-artifact
@@ -110,8 +104,7 @@ jobs:
   sonar_scan_code:
     name: 4. SonarCloud Scan & Normalization
     runs-on: ubuntu-latest
-    needs: run_tests # Depende del Job 3
-    # Define la salida del job para que el ID de ejecución (Run ID) sea accesible por el Job 5
+    needs: run_tests
     outputs:
       run_id: ${{ github.sha }}
       
@@ -119,7 +112,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Necesario para análisis de Sonar
+          fetch-depth: 0
 
       - name: Setup Node.js Environment (22.12.0)
         uses: actions/setup-node@v4
@@ -127,7 +120,6 @@ jobs:
           node-version: '22.12.0'
           
       - name: Download Coverage Artifact
-        # Descarga el reporte de cobertura LCOV.
         uses: actions/download-artifact@v4
         with:
           name: coverage-artifact
@@ -152,5 +144,4 @@ jobs:
           echo "--------------------------------------------------------"
           echo "Normalization and Upload for Run ID: ${{ github.sha }}"
           echo "--------------------------------------------------------"
-          # Aquí iría tu script para llamar a la API de SonarCloud y subir los hallazgos a Firestore.
           # node ./scripts/normalize-reports.js --runId ${{ github.sha }}
