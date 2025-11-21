@@ -94,7 +94,7 @@ ${sourceCode}
       const truncatedSource = sourceCode.length > 4000 ? sourceCode.substring(0, 4000) + '... (truncated)' : sourceCode;
       const safePrompt = prompt.replace(/"/g, '\\"'); 
       
-      const command = `gemini-cli -p "${safePrompt}"`;
+      const command = `gemini -p "${safePrompt}"`;
       
       const output = execSync(command, { encoding: 'utf8', maxBuffer: 1024 * 1024 * 10 });
       
