@@ -58,8 +58,8 @@ jobs:
       - name: Validate node_modules
         run: ls -R node_modules/.bin || echo "bin folder missing"
 
-      - name: Validate node_modules
-        run: ls
+      - name: Install angular
+        run: npm install @angular/cli@20 -g
 
       - name: Run Build
         run: npm run build
