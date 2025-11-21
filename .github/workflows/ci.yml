@@ -60,9 +60,7 @@ jobs:
           path: .
           
       - name: Run Build
-        # CORRECCIÓN APLICADA: Se reemplaza 'npm run build --if-present' por 'npx ng build'
-        # para garantizar que el binario 'ng' sea encontrado por npx, independientemente del PATH.
-        run: npm run ng build
+        run: npm run build
         
       - name: Upload Dist Folder Artifact
         # Sube la carpeta 'dist' (o el nombre de la carpeta de salida de tu build)
@@ -98,7 +96,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dist-artifact
-          path: .
+          path: dist
           
       - name: Run Tests and Generate Coverage Report
         # Ya usa NPX, lo cual es correcto para binarios locales.
@@ -145,9 +143,16 @@ jobs:
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2.2.0
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
-        # SonarCloud intentará encontrar el reporte de cobertura en 'coverage/lcov.info'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=${{ github.repository }}
+            -Dsonar.organization=${{ github.repository_owner }}
+            -Dsonar.sources=src
+            -Dsonar.tests=src
+            -Dsonar.test.inclusions=**/*.spec.ts
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
         
       - name: Normalization and Upload to Firestore
         run: |
