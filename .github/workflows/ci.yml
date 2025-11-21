@@ -58,6 +58,9 @@ jobs:
       - name: Validate node_modules
         run: ls -R node_modules/.bin || echo "bin folder missing"
 
+      - name: Validate node_modules
+        run: ls node_modules/ && ls
+
       - name: Run Build
         run: npm run build
         
