@@ -72,8 +72,16 @@ function checkCoverageAndFix() {
       return;
   }
 
-  // Construct the prompt
-  const prompt = `
+  const MAX_RETRIES = 3;
+  let currentRetry = 0;
+  let lastError = '';
+  let success = false;
+
+  while (currentRetry < MAX_RETRIES) {
+    console.log(`Attempt ${currentRetry + 1}/${MAX_RETRIES}...`);
+
+    // Construct the prompt
+    let fullPrompt = `
 You are an expert Angular Unit Tester.
 The following Angular file has low code coverage (${lowestPct}%).
 Please generate a complete *.spec.ts file that tests this component/service to achieve high coverage.
@@ -88,44 +96,79 @@ File Content:
 ${sourceCode}
 `;
 
-  console.log('Asking Gemini to generate tests (TOML format)...');
-  
-  try {
-      const truncatedSource = sourceCode.length > 4000 ? sourceCode.substring(0, 4000) + '... (truncated)' : sourceCode;
-      const safePrompt = prompt.replace(/"/g, '\\"'); 
-      
-      const command = `gemini -p "${safePrompt}"`;
-      
-      const output = execSync(command, { encoding: 'utf8', maxBuffer: 1024 * 1024 * 10 });
-      
-      // Parse TOML output (simple regex extraction for the 'code' key)
-      // We look for code = """ ... """ or code = ''' ... '''
-      let generatedCode = '';
-      const tomlMatch = output.match(/code\s*=\s*(?:"""|''')([\s\S]*?)(?:"""|''')/);
-      
-      if (tomlMatch && tomlMatch[1]) {
-          generatedCode = tomlMatch[1].trim();
-      } else {
-          // Fallback: try to find code block if TOML parsing fails or AI ignored instructions
-          console.warn('Could not parse TOML. Falling back to markdown block extraction.');
-          generatedCode = output.replace(/```typescript/g, '').replace(/```/g, '').trim();
-      }
-      
-      if (!generatedCode) {
-          console.error('Failed to extract code from AI output.');
-          return;
-      }
+    if (lastError) {
+        fullPrompt += `
+\n\nPREVIOUS ATTEMPT FAILED.
+The following errors occurred when running the tests:
+${lastError}
 
+Please FIX the code to resolve these errors and ensure tests pass.
+`;
+    }
+
+    console.log('Asking Gemini to generate tests (TOML format)...');
+    
+    let generatedCode = '';
+    try {
+        const truncatedSource = sourceCode.length > 4000 ? sourceCode.substring(0, 4000) + '... (truncated)' : sourceCode;
+        const safePrompt = fullPrompt.replace(/"/g, '\\"'); 
+        
+        const command = `gemini -p "${safePrompt}"`;
+        
+        const output = execSync(command, { encoding: 'utf8', maxBuffer: 1024 * 1024 * 10 });
+        
+        const tomlMatch = output.match(/code\s*=\s*(?:"""|''')([\s\S]*?)(?:"""|''')/);
+        
+        if (tomlMatch && tomlMatch[1]) {
+            generatedCode = tomlMatch[1].trim();
+        } else {
+            console.warn('Could not parse TOML. Falling back to markdown block extraction.');
+            generatedCode = output.replace(/```typescript/g, '').replace(/```/g, '').trim();
+        }
+        
+        if (!generatedCode) {
+            throw new Error('Failed to extract code from AI output.');
+        }
+
+        const specFile = worstFile.replace('.ts', '.spec.ts');
+        console.log(`Writing generated tests to ${specFile}...`);
+        fs.writeFileSync(specFile, generatedCode);
+        
+        // Run tests to verify
+        console.log('Running tests to verify...');
+        // We use npx ng test. We try to target the specific file if possible, or run all.
+        // Running all is safer but slower. Let's try running all for now to ensure no regressions.
+        // We need --browsers=ChromeHeadlessCI and --watch=false
+        try {
+            execSync('npx ng test --watch=false --browsers=ChromeHeadlessCI', { stdio: 'pipe', encoding: 'utf8' });
+            console.log('Tests passed!');
+            success = true;
+            break; // Exit loop
+        } catch (testError) {
+            console.error('Tests failed.');
+            lastError = testError.stdout || testError.stderr || testError.message;
+            // Truncate error if too long
+            if (lastError.length > 1000) lastError = lastError.substring(0, 1000) + '...';
+            console.log('Captured error for retry.');
+        }
+
+    } catch (e) {
+        console.error('Error in generation/verification step:', e);
+        lastError = e.message;
+    }
+
+    currentRetry++;
+  }
+
+  if (!success) {
+      console.error('Failed to generate passing tests after retries. Reverting changes.');
       const specFile = worstFile.replace('.ts', '.spec.ts');
-      
-      console.log(`Writing generated tests to ${specFile}...`);
-      fs.writeFileSync(specFile, generatedCode);
-      
-      console.log('Test generation complete.');
-      
-  } catch (e) {
-      console.error('Error generating tests with Gemini:', e);
+      if (fs.existsSync(specFile)) {
+          fs.unlinkSync(specFile);
+      }
       process.exit(1);
+  } else {
+      console.log('Successfully generated passing tests.');
   }
 }
 
