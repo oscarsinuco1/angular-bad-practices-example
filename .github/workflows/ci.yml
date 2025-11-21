@@ -29,8 +29,11 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Install Dependencies
+        run: npm ci
+
       - name: Run Build
-        run: npm run build
+        run: npm run build -- --base-href /bad-practices-project/${{ github.sha }}/
         
       - name: Upload Dist Folder Artifact
         uses: actions/upload-artifact@v4
@@ -59,7 +62,7 @@ jobs:
       - name: Run Tests and Generate Coverage Report
         run: |
           echo "Running unit tests and generating coverage report..."
-          npx ng test --no-watch --code-coverage || true
+          npx ng test --no-watch --code-coverage --browsers=ChromeHeadlessCI
 
       - name: Upload Coverage Artifact
         uses: actions/upload-artifact@v4
@@ -113,3 +116,29 @@ jobs:
           echo "Normalization and Upload for Run ID: ${{ github.sha }}"
           echo "--------------------------------------------------------"
           # node ./scripts/normalize-reports.js --runId ${{ github.sha }}
+
+  # JOB 4: DESPLIEGUE A GITHUB PAGES
+  deploy_pages:
+    name: 4. Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: [build_app, run_tests] # Wait for build and tests
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Dist Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-artifact
+          path: dist/bad-practices-project
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist/bad-practices-project
+          destination_dir: ${{ github.sha }}
+          keep_files: true # Keep other versions
