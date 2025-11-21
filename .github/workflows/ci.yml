@@ -60,7 +60,7 @@ jobs:
           path: .
           
       - name: Run Build
-        run: npm run build
+        run: npx ng build
         
       - name: Upload Dist Folder Artifact
         # Sube la carpeta 'dist' (o el nombre de la carpeta de salida de tu build)
