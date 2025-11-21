@@ -60,7 +60,8 @@ jobs:
           path: .
           
       - name: Run Build
-        # Ejecuta la compilación de Angular.
+        # CORRECCIÓN: Ejecuta la compilación de Angular. 'npm run' debería resolver 'ng', 
+        # pero es más seguro si ya está en el path. Mantenemos el comando.
         run: npm run build --if-present
         
       - name: Upload Dist Folder Artifact
@@ -100,10 +101,12 @@ jobs:
           path: .
           
       - name: Run Tests and Generate Coverage Report
+        # CORRECCIÓN: Usamos NPX para garantizar que el binario 'ng' sea encontrado 
+        # aunque el PATH no se haya actualizado correctamente después de la descarga del artifact.
         run: |
           echo "Running unit tests and generating coverage report..."
           # Genera el reporte LCOV en la carpeta 'coverage/'
-          npm run test -- --no-watch --code-coverage || true 
+          npx ng test --no-watch --code-coverage || true 
 
       - name: Upload Coverage Artifact
         # Sube el reporte de cobertura LCOV para que Sonar lo use.
