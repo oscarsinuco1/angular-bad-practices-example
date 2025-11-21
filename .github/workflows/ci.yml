@@ -60,15 +60,15 @@ jobs:
           path: .
           
       - name: Run Build
-        run: npx ng build
+        run: npx ng build --configuration production
         
       - name: Upload Dist Folder Artifact
-        # Sube la carpeta 'dist' (o el nombre de la carpeta de salida de tu build)
+        # Sube la carpeta 'dist/bad-practices-project' (Angular 18+ usa esta estructura)
         uses: actions/upload-artifact@v4
         with:
           name: dist-artifact
-          path: dist
-          retention-days: 1 
+          path: dist/bad-practices-project
+          retention-days: 1
 
   # JOB 3: EJECUCIÓN DE PRUEBAS (TESTS)
   run_tests:
@@ -91,19 +91,12 @@ jobs:
           name: node-modules-artifact
           path: .
           
-      - name: Download Dist Folder Artifact
-        # Descarga el build (necesario para algunas configuraciones de test).
-        uses: actions/download-artifact@v4
-        with:
-          name: dist-artifact
-          path: dist
-          
       - name: Run Tests and Generate Coverage Report
         # Ya usa NPX, lo cual es correcto para binarios locales.
         run: |
           echo "Running unit tests and generating coverage report..."
           # Genera el reporte LCOV en la carpeta 'coverage/'
-          npx ng test --no-watch --code-coverage || true 
+          npx ng test --no-watch --code-coverage || true
 
       - name: Upload Coverage Artifact
         # Sube el reporte de cobertura LCOV para que Sonar lo use.
