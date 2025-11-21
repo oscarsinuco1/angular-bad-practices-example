@@ -60,9 +60,9 @@ jobs:
           path: .
           
       - name: Run Build
-        # CORRECCIÓN: Ejecuta la compilación de Angular. 'npm run' debería resolver 'ng', 
-        # pero es más seguro si ya está en el path. Mantenemos el comando.
-        run: npm run build --if-present
+        # CORRECCIÓN APLICADA: Se reemplaza 'npm run build --if-present' por 'npx ng build'
+        # para garantizar que el binario 'ng' sea encontrado por npx, independientemente del PATH.
+        run: npm run ng build
         
       - name: Upload Dist Folder Artifact
         # Sube la carpeta 'dist' (o el nombre de la carpeta de salida de tu build)
@@ -101,8 +101,7 @@ jobs:
           path: .
           
       - name: Run Tests and Generate Coverage Report
-        # CORRECCIÓN: Usamos NPX para garantizar que el binario 'ng' sea encontrado 
-        # aunque el PATH no se haya actualizado correctamente después de la descarga del artifact.
+        # Ya usa NPX, lo cual es correcto para binarios locales.
         run: |
           echo "Running unit tests and generating coverage report..."
           # Genera el reporte LCOV en la carpeta 'coverage/'
