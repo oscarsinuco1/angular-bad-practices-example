@@ -33,7 +33,7 @@ jobs:
         run: npm ci
 
       - name: Run Build
-        run: npm run build -- --base-href /bad-practices-project/${{ github.sha }}/
+        run: npm run build -- --base-href /angular-bad-practices-example/${{ github.sha }}/
         
       - name: Upload Dist Folder Artifact
         uses: actions/upload-artifact@v4
@@ -103,7 +103,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=${{ github.repository }}
+            -Dsonar.projectKey=oscarsinuco1_angular-bad-practices-example
             -Dsonar.organization=${{ github.repository_owner }}
             -Dsonar.sources=src
             -Dsonar.tests=src
