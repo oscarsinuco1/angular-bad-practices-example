@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<testsuite name="Chrome Headless 140.0.0.0 (Linux 0.0.0)" package="" timestamp="2025-11-21T16:48:18" id="0" hostname="oscarsinuco-VivoBook-ASUSLaptop-X515DA-M515DA" tests="1" errors="0" failures="0" time="0.1">
+  <properties>
+    <property name="browser.fullName" value="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/140.0.0.0 Safari/537.36"/>
+  </properties>
+  <testcase name="App should create the app" time="0.1" classname="App"/>
+  <system-out>
+    <![CDATA[Chrome Headless 140.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: App component initialized.'
+,Chrome Headless 140.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetching all users...'
+
+]]>
+  </system-out>
+  <system-err/>
+</testsuite>

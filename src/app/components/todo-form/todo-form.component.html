@@ -1,0 +1,17 @@
+<div class="form-container">
+  <mat-form-field appearance="fill">
+    <mat-label>New To-Do</mat-label>
+    <input matInput [(ngModel)]="newTodoText" (keyup.enter)="addTodo()">
+  </mat-form-field>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Priority</mat-label>
+    <mat-select [(ngModel)]="newTodoPriority">
+      <mat-option value="high">High</mat-option>
+      <mat-option value="medium">Medium</mat-option>
+      <mat-option value="low">Low</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <button mat-raised-button color="primary" (click)="addTodo()">Add Task</button>
+</div>

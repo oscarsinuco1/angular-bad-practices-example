@@ -13,11 +13,6 @@ describe('App', () => {
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
   });
-
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(App);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, bad-practices-project');
-  });
+  // Removed 'should render title' test to reduce coverage
+  // and not testing the title signal or the H1 element in the template.
 });

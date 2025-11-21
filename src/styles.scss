@@ -1,1 +1,17 @@
-/* You can add global styles to this file, and also import other style files */
+// 1. Import Open Sans font from Google Fonts
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap');
+// 2. Import Material Icons font
+@import url("https://fonts.googleapis.com/icon?family=Material+Icons");
+
+// 3. Import the new Angular Material theme
+@import '@angular/material/prebuilt-themes/deeppurple-amber.css';
+
+// 4. Apply the font and basic body styles
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Open Sans', sans-serif;
+}
