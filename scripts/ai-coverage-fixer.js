@@ -72,7 +72,7 @@ function checkCoverageAndFix() {
       return;
   }
 
-  const MAX_RETRIES = 3;
+  const MAX_RETRIES = 6;
   let currentRetry = 0;
   let lastError = '';
   let success = false;
