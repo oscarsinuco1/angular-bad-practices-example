@@ -504,7 +504,10 @@ def check_code_smells_and_fix():
                 else:
                     print('Error in fix generation/verification:', e)
                     last_error = error_str
-                    current_retry += 1
+
+            # Increment retry counter for build/test failures or non-quota AI errors
+            if not success:
+                current_retry += 1
 
         if not success:
             print('Failed to generate passing fixes after retries.')

@@ -377,7 +377,10 @@ def check_coverage_and_fix():
                 else:
                     print('Error in generation/verification step:', e)
                     last_error = error_str
-                    current_retry += 1
+
+            # Increment retry counter for build/test failures or non-quota AI errors
+            if not success:
+                current_retry += 1
 
         if not success:
             print('Failed to generate passing tests after retries. Keeping the last attempt.')
