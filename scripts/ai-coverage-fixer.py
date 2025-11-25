@@ -200,13 +200,27 @@ Please FIX the code to resolve these errors and ensure tests pass.
 
     return spec_codes, component_codes
 
+def run_build():
+    """Run build to check for compilation errors"""
+    try:
+        result = subprocess.run(['npx', 'ng', 'build', '--configuration', 'development'], capture_output=True, text=True, timeout=300)
+        if result.returncode == 0:
+            return True, None
+        else:
+            error_output = (result.stderr or '') + (result.stdout or '')
+            return False, error_output[-3000:] if len(error_output) > 3000 else error_output
+    except subprocess.TimeoutExpired:
+        return False, "Build timed out after 5 minutes"
+    except Exception as e:
+        return False, f"Build execution error: {str(e)}"
+
 def run_tests():
     stop_spinner = threading.Event()
     spinner_thread = threading.Thread(target=spinner, args=(stop_spinner, "Running tests"))
     spinner_thread.start()
 
     try:
-        result = subprocess.run(['npm', 'run', 'test:ci'], capture_output=True, text=True, timeout=300)
+        result = subprocess.run(['npx', 'ng', 'test', '--watch=false', '--browsers=ChromeHeadlessCI', '--code-coverage', '--reporters=progress,junit,kjhtml'], capture_output=True, text=True, timeout=300)
         if result.returncode == 0:
             return True, None
         else:
@@ -234,13 +248,24 @@ def run_tests():
         spinner_thread.join()
         print()  # New line after spinner
 
+def run_build_and_tests():
+    """Run build and then tests"""
+    print('Running build...')
+    build_success, build_error = run_build()
+    if not build_success:
+        print('Build failed:', build_error)
+        return False, build_error
+
+    print('Build passed. Running tests...')
+    return run_tests()
+
 def check_coverage_and_fix():
-    print('Running initial tests to generate fresh coverage data...')
-    success, error = run_tests()
+    print('Running initial build and tests to generate fresh coverage data...')
+    success, error = run_build_and_tests()
     if not success:
-        print('Initial tests failed:', error)
+        print('Initial build/tests failed:', error)
         exit(1)
-    print('Initial tests passed. Coverage data updated.')
+    print('Initial build and tests passed. Coverage data updated.')
 
     max_iterations = 15
     iteration = 0
@@ -318,9 +343,9 @@ def check_coverage_and_fix():
                         else:
                             print(f'No component changes for {file_path}')
 
-                print_progress_bar(total_coverage, THRESHOLD, 'Running tests...')
+                print_progress_bar(total_coverage, THRESHOLD, 'Running build and tests...')
                 print()
-                success, last_error = run_tests()
+                success, last_error = run_build_and_tests()
                 if success:
                     print_progress_bar(total_coverage, THRESHOLD, 'Tests passed! Updating coverage...')
                     print()

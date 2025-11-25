@@ -130,7 +130,7 @@ def get_repo_structure_and_content():
     except Exception as e:
         return f"Error getting repo structure: {e}", {}
 
-def generate_fixes_with_ai(issues, grouped_issues, files_to_fix, last_error):
+def generate_fixes_with_ai(issues, grouped_issues, files_to_fix, last_error, initial_error=''):
     # Get complete repo structure and content for each iteration
     tree_structure, repo_content = get_repo_structure_and_content()
 
@@ -181,6 +181,16 @@ COMPLETE APPLICATION CONTEXT:
         for j, issue in enumerate(file_issues):
             full_prompt += f"Issue {j+1}: Line {issue['line']} - {issue['message']} (Rule: {issue['rule']})\n"
 
+
+    if initial_error:
+        full_prompt += """
+
+INITIAL BUILD/TEST ERRORS.
+The following errors occurred in the initial build/test run:
+""" + initial_error + """
+
+Please fix these compilation and test errors first, then address the code smells.
+"""
 
     if last_error:
         full_prompt += """
@@ -416,8 +426,14 @@ def check_code_smells_and_fix():
     success, error = run_build_and_tests()
     if not success:
         print('Initial build/tests failed:', error)
-        exit(1)
-    print('Initial build and tests passed.')
+        if CI_MODE:
+            print('In CI mode, will attempt to fix initial errors')
+            initial_error = error
+        else:
+            exit(1)
+    else:
+        print('Initial build and tests passed.')
+        initial_error = ''
 
     max_iterations = 10
     iteration = 0
@@ -441,7 +457,7 @@ def check_code_smells_and_fix():
                 for file_path in files_to_fix:
                     issues_list.extend(grouped_issues[file_path])
 
-                component_codes = generate_fixes_with_ai(issues_list, grouped_issues, files_to_fix, last_error)
+                component_codes = generate_fixes_with_ai(issues_list, grouped_issues, files_to_fix, last_error, initial_error)
 
                 if DEBUG_MODE:
                     response_data = {
