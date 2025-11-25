@@ -130,7 +130,9 @@ def get_repo_structure_and_content():
     except Exception as e:
         return f"Error getting repo structure: {e}", {}
 
-def generate_fixes_with_ai(issues, grouped_issues, files_to_fix, last_error, initial_error=''):
+def generate_fixes_with_ai(issues, grouped_issues, files_to_fix, last_error, initial_error='', failed_models=None):
+    if failed_models is None:
+        failed_models = set()
     # Get complete repo structure and content for each iteration
     tree_structure, repo_content = get_repo_structure_and_content()
 
@@ -212,8 +214,11 @@ Please FIX the code to resolve these errors and ensure tests pass.
 
     generated_text = None
 
-    # Try Gemini models in order
+    # Try Gemini models in order, skipping failed ones
     for model_name in GEMINI_MODELS:
+        if model_name in failed_models:
+            print(f'Skipping previously failed model {model_name}')
+            continue
         if generated_text is None:
             try:
                 print(f'Trying Gemini {model_name}...')
@@ -223,7 +228,10 @@ Please FIX the code to resolve these errors and ensure tests pass.
                 print(f'Gemini {model_name} response received')
                 break  # Success, stop trying
             except Exception as e:
+                error_str = str(e)
                 print(f'Gemini {model_name} failed: {e}')
+                # Mark model as failed for future iterations
+                failed_models.add(model_name)
                 continue
 
     if generated_text is None:
@@ -438,6 +446,7 @@ def check_code_smells_and_fix():
     max_iterations = 10
     iteration = 0
     modified_files = set()
+    failed_models = set()  # Track failed models across iterations
 
     while iteration < max_iterations and grouped_issues:
         print(f'\nIteration {iteration + 1}: Fixing issues in {len(grouped_issues)} files')
@@ -457,7 +466,7 @@ def check_code_smells_and_fix():
                 for file_path in files_to_fix:
                     issues_list.extend(grouped_issues[file_path])
 
-                component_codes = generate_fixes_with_ai(issues_list, grouped_issues, files_to_fix, last_error, initial_error)
+                component_codes = generate_fixes_with_ai(issues_list, grouped_issues, files_to_fix, last_error, initial_error, failed_models)
 
                 if DEBUG_MODE:
                     response_data = {
