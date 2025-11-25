@@ -10,16 +10,21 @@ import toml
 import google.generativeai as genai
 
 SONAR_API_URL = "https://sonarcloud.io/api/issues/search"
-SONAR_TOKEN = "4cc2e3525b35bb2643a7646b04c5127b0b89da5f"  # Note: In production, use environment variables
+SONAR_TOKEN = os.getenv('SONAR_TOKEN')  # Fallback for local testing
 PROJECT_KEY = "oscarsinuco1_angular-bad-practices-example"
 BRANCH_NAME = "sonar-fix"
 
 # Configure Gemini
-genai.configure(api_key='AIzaSyBmLydzon_Vjs0wTVrQovuHpyuEkj9YIWg')
-gemini_model = genai.GenerativeModel('gemini-2.5-pro')  # Using stable version
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')  # Fallback for local testing
+genai.configure(api_key=GEMINI_API_KEY)
+# GEMINI_MODELS = ['gemini-3-pro', 'gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.5-flash-lite']
+GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite']
 
 # Debug mode - save AI responses for review instead of applying
 DEBUG_MODE = False
+
+# CI mode - skip git operations when running in CI
+CI_MODE = os.getenv('CI') == 'true'
 
 def print_progress_bar(current, total, description=""):
     bar_length = 30
@@ -39,7 +44,7 @@ def spinner(stop_event, message="Processing"):
         time.sleep(0.1)
     sys.stdout.write('\r' + ' ' * (len(message) + 2) + '\r')  # Clear the line
 
-def fetch_code_smells():
+def fetch_code_smells(branch=None):
     """Fetch code smells from SonarCloud API"""
     try:
         cmd = [
@@ -48,6 +53,8 @@ def fetch_code_smells():
             '-d', 'types=CODE_SMELL',
             '-d', 'ps=500'
         ]
+        if branch:
+            cmd.extend(['-d', f'branch={branch}'])
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode != 0:
             print(f'Failed to fetch code smells: {result.stderr}')
@@ -56,6 +63,31 @@ def fetch_code_smells():
     except Exception as e:
         print(f'Error fetching code smells: {e}')
         return []
+
+def fetch_coverage(branch=None):
+    """Fetch coverage percentage from SonarCloud API"""
+    try:
+        measures_url = "https://sonarcloud.io/api/measures/component"
+        cmd = [
+            'curl', '-u', f'{SONAR_TOKEN}:', measures_url,
+            '-d', f'component={PROJECT_KEY}',
+            '-d', 'metricKeys=coverage'
+        ]
+        if branch:
+            cmd.extend(['-d', f'branch={branch}'])
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f'Failed to fetch coverage: {result.stderr}')
+            return None
+        data = json.loads(result.stdout)
+        measures = data.get('component', {}).get('measures', [])
+        for measure in measures:
+            if measure['metric'] == 'coverage':
+                return float(measure['value'])
+        return None
+    except Exception as e:
+        print(f'Error fetching coverage: {e}')
+        return None
 
 def parse_issues(api_response):
     """Parse API response and extract issues"""
@@ -114,20 +146,21 @@ Angular 20 Code Quality Guidelines:
 - Follow Angular best practices
 - Ensure TypeScript strict mode compliance
 - Use proper error handling and null safety
+- ONLY modify application source files in src/app/ - do not modify configuration files like karma.conf.js, angular.json, package.json, or any other config files
 
 Project Config:
 - TypeScript: strict mode enabled, target ES2022.
 - Angular: strict templates, injection parameters, etc.
 
-Output the response only as a Python list of strings with the complete file contents for the fixed files, in the SAME ORDER as the unique files listed above (one entry per file, even if multiple issues in the same file)
+Output the response only as a Python dict where keys are the file paths (exactly as listed above) and values are the complete fixed file contents as strings.
 
 Example:
-[
-  "import { ... } from ...\\n...",
-  "..."
-]
+{
+  "src/app/components/component-a/component-a.component.scss": "/* Fixed content */",
+  "src/app/components/component-b/component-b.component.ts": "import { ... } from ...\\n..."
+}
 
-REMEMBER: response only contains the Python list, not text, not recommendations, only the list
+REMEMBER: response only contains the Python dict, not text, not recommendations, only the dict
 
 COMPLETE APPLICATION CONTEXT:
 """
@@ -169,16 +202,22 @@ Please FIX the code to resolve these errors and ensure tests pass.
 
     generated_text = None
 
-    # Try Gemini
+    # Try Gemini models in order
+    for model_name in GEMINI_MODELS:
+        if generated_text is None:
+            try:
+                print(f'Trying Gemini {model_name}...')
+                model = genai.GenerativeModel(model_name)
+                response = model.generate_content(full_prompt)
+                generated_text = response.text.strip()
+                print(f'Gemini {model_name} response received')
+                break  # Success, stop trying
+            except Exception as e:
+                print(f'Gemini {model_name} failed: {e}')
+                continue
+
     if generated_text is None:
-        try:
-            print('Trying Gemini...')
-            response = gemini_model.generate_content(full_prompt)
-            generated_text = response.text.strip()
-            print('Gemini response received')
-        except Exception as e:
-            print(f'Gemini failed: {e}')
-            raise Exception('AI provider failed')
+        raise Exception('All AI providers failed')
 
     # Parse the response (AI is outputting Python-like syntax)
     try:
@@ -191,15 +230,12 @@ Please FIX the code to resolve these errors and ensure tests pass.
         generated_text = generated_text.strip()
 
         print(f"Attempting to parse response: {generated_text[:200]}...")
-        # Extract the list part if it's component_codes = [...]
-        if 'component_codes =' in generated_text:
-            list_part = generated_text.split('component_codes =', 1)[1].strip()
-            component_codes = ast.literal_eval(list_part)
-        else:
-            # Try to parse as direct list
-            component_codes = ast.literal_eval(generated_text)
-        if not isinstance(component_codes, list):
-            component_codes = [str(component_codes)]
+        # Parse as Python dict
+        fixed_files = ast.literal_eval(generated_text)
+        if not isinstance(fixed_files, dict):
+            raise ValueError("Expected dict")
+        # Convert to list in the order of files_to_fix
+        component_codes = [fixed_files.get(file_path, "") for file_path in files_to_fix]
         print(f"Successfully parsed {len(component_codes)} component codes")
     except Exception as e:
         print(f"Parsing failed: {e}")
@@ -209,6 +245,20 @@ Please FIX the code to resolve these errors and ensure tests pass.
         component_codes = [generated_text]
 
     return component_codes
+
+def run_build():
+    """Run build to check for compilation errors"""
+    try:
+        result = subprocess.run(['ng', 'build', '--configuration', 'development'], capture_output=True, text=True, timeout=300)
+        if result.returncode == 0:
+            return True, None
+        else:
+            error_output = (result.stderr or '') + (result.stdout or '')
+            return False, error_output[-3000:] if len(error_output) > 3000 else error_output
+    except subprocess.TimeoutExpired:
+        return False, "Build timed out after 5 minutes"
+    except Exception as e:
+        return False, f"Build execution error: {str(e)}"
 
 def run_tests():
     stop_spinner = threading.Event()
@@ -244,6 +294,17 @@ def run_tests():
         spinner_thread.join()
         print()  # New line after spinner
 
+def run_build_and_tests():
+    """Run build and then tests"""
+    print('Running build...')
+    build_success, build_error = run_build()
+    if not build_success:
+        print('Build failed:', build_error)
+        return False, build_error
+
+    print('Build passed. Running tests...')
+    return run_tests()
+
 def convert_issues_to_toml(issues):
     """Convert issues to TOML format for AI"""
     toml_data = []
@@ -258,19 +319,26 @@ def convert_issues_to_toml(issues):
         toml_data.append(toml.dumps(toml_issue))
     return toml_data
 
-def create_and_push_branch():
+def create_and_push_branch(modified_files):
     """Create sonar-fix branch and push changes"""
     try:
-        # Check if branch exists, delete if it does
-        result = subprocess.run(['git', 'branch', '-D', BRANCH_NAME], capture_output=True)
+        # Stash any changes
+        subprocess.run(['git', 'stash'], capture_output=True)
+        # Switch to main branch
+        subprocess.run(['git', 'checkout', 'main'], check=True, capture_output=True)
+        # Delete branch if exists
+        subprocess.run(['git', 'branch', '-D', BRANCH_NAME], capture_output=True)
         # Create new branch
         subprocess.run(['git', 'checkout', '-b', BRANCH_NAME], check=True)
-        # Add all changes
-        subprocess.run(['git', 'add', '.'], check=True)
+        # Pop stash
+        subprocess.run(['git', 'stash', 'pop'], capture_output=True)
+        # Add only modified files
+        for file_path in modified_files:
+            subprocess.run(['git', 'add', file_path], check=True)
         # Commit
         subprocess.run(['git', 'commit', '-m', 'fix: AI-generated code smell fixes'], check=True)
-        # Push
-        subprocess.run(['git', 'push', '-u', 'origin', BRANCH_NAME], check=True)
+        # Push (force if needed)
+        subprocess.run(['git', 'push', '-f', '-u', 'origin', BRANCH_NAME], check=True)
         print(f'Pushed changes to branch {BRANCH_NAME}')
     except subprocess.CalledProcessError as e:
         print(f'Git operation failed: {e}')
@@ -344,20 +412,21 @@ def check_code_smells_and_fix():
     grouped_issues = group_issues_by_file(issues)
     print(f'Issues grouped into {len(grouped_issues)} files.')
 
-    print('Running initial tests...')
-    success, error = run_tests()
+    print('Running initial build and tests...')
+    success, error = run_build_and_tests()
     if not success:
-        print('Initial tests failed:', error)
+        print('Initial build/tests failed:', error)
         exit(1)
-    print('Initial tests passed.')
+    print('Initial build and tests passed.')
 
     max_iterations = 10
     iteration = 0
+    modified_files = set()
 
     while iteration < max_iterations and grouped_issues:
         print(f'\nIteration {iteration + 1}: Fixing issues in {len(grouped_issues)} files')
 
-        MAX_RETRIES = 5
+        MAX_RETRIES = 7
         current_retry = 0
         last_error = ''
         success = False
@@ -392,13 +461,14 @@ def check_code_smells_and_fix():
                         print(f'Applying fix to {file_path}...')
                         with open(file_path, 'w') as f:
                             f.write(component_codes[i])
+                        modified_files.add(file_path)
 
-                print('Running tests...')
-                success, last_error = run_tests()
+                print('Running build and tests...')
+                success, last_error = run_build_and_tests()
                 if success:
-                    print('Tests passed!')
+                    print('Build and tests passed!')
                 else:
-                    print('Tests failed, retrying...')
+                    print('Build/tests failed, retrying...')
 
             except Exception as e:
                 print('Error in fix generation/verification:', e)
@@ -410,32 +480,52 @@ def check_code_smells_and_fix():
             print('Failed to generate passing fixes after retries.')
             exit(1)
 
-        # After successful iteration, re-fetch issues to see progress
-        print('Re-fetching issues to check progress...')
-        api_response = fetch_code_smells()
+        if CI_MODE:
+            # In CI, don't push or verify, just finish
+            print('Running in CI mode, skipping git operations and verification.')
+            return
+
+        # After successful iteration, push and check progress with SonarCloud
+        print('Pushing changes and checking progress with SonarCloud...')
+        create_and_push_branch(list(modified_files))
+
+        print('Waiting for CI to complete...')
+        time.sleep(180)  # Wait 5 min for CI
+
+        print('Checking if issues are resolved...')
+        api_response = fetch_code_smells(branch=BRANCH_NAME)
         issues = parse_issues(api_response)
         if not issues:
-            print('All issues resolved!')
-            break
+            print('All code smells resolved!')
+            # Now check and improve coverage if needed
+            print('Checking code coverage...')
+            coverage = fetch_coverage(branch=BRANCH_NAME)
+            if coverage is not None:
+                print(f'Current coverage: {coverage}%')
+                if coverage < 80:
+                    print('Coverage below 80%, improving...')
+                    try:
+                        subprocess.run(['python', 'scripts/ai-coverage-fixer.py'], check=True)
+                        print('Coverage improvement completed.')
+                    except subprocess.CalledProcessError as e:
+                        print(f'Coverage improvement failed: {e}')
+                else:
+                    print('Coverage is good (>=80%).')
+            else:
+                print('Could not fetch coverage, skipping improvement.')
+            return  # Exit successfully
 
         # Re-group remaining issues
         grouped_issues = group_issues_by_file(issues)
+        print(f'Still {len(grouped_issues)} files with issues after iteration {iteration + 1}')
 
         iteration += 1
 
     if grouped_issues:
         remaining_count = sum(len(issues) for issues in grouped_issues.values())
-        print(f'Still {remaining_count} issues remaining in {len(grouped_issues)} files after max iterations.')
+        print(f'Max iterations reached. Still {remaining_count} issues remaining in {len(grouped_issues)} files.')
     else:
-        print('All code smells fixed locally.')
-
-    # Now push and verify
-    print('Creating branch and pushing changes...')
-    create_and_push_branch()
-
-    print('Verifying with SonarCloud...')
-    original_issues = parse_issues(fetch_code_smells())  # Re-fetch to get keys
-    verify_issues_resolved(original_issues)
+        print('All code smells fixed.')
 
     print('Process completed.')
 
