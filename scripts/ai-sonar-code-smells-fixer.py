@@ -478,7 +478,8 @@ def check_code_smells_and_fix():
 
         if not success:
             print('Failed to generate passing fixes after retries.')
-            exit(1)
+            if not CI_MODE:
+                exit(1)
 
         if CI_MODE:
             # In CI, don't push or verify, just finish

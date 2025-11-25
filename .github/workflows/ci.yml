@@ -190,26 +190,47 @@ jobs:
           python scripts/ai-coverage-fixer.py
         continue-on-error: true
 
+      - name: Commit Coverage Changes
+        run: |
+          if git diff --quiet; then
+            echo "No coverage changes"
+          else
+            git add .
+            git -c author.name=oscarsinuco1 -c author.email=oscarsinuco1@users.noreply.github.com -c committer.name=GitHub -c committer.email=noreply@github.com commit -m "test: AI-generated coverage improvements" || echo "No changes to commit"
+          fi
+        continue-on-error: true
+
       - name: Run AI Code Smells Fixer
         id: smells_fixer
         run: |
           python scripts/ai-sonar-code-smells-fixer.py
         continue-on-error: true
 
+      - name: Commit Code Smells Changes
+        run: |
+          if git diff --quiet; then
+            echo "No code smells changes"
+          else
+            git add .
+            git -c author.name=oscarsinuco1 -c author.email=oscarsinuco1@users.noreply.github.com -c committer.name=GitHub -c committer.email=noreply@github.com commit -m "fix: AI-generated code smell fixes" || echo "No changes to commit"
+          fi
+        continue-on-error: true
+
       - name: Check for Changes
         id: check_changes
         run: |
-          if git diff --quiet; then
-            echo "No changes made by AI scripts"
-            echo "has_changes=false" >> $GITHUB_OUTPUT
-          else
+          if git diff --quiet && git log --oneline -1 | grep -q "AI"; then
             echo "Changes detected, creating PR"
             echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "No changes made by AI scripts"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Create Pull Request
         if: steps.check_changes.outputs.has_changes == 'true'
         uses: peter-evans/create-pull-request@v5
+        continue-on-error: true
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "test: AI improvements - coverage and code smells"
@@ -222,4 +243,5 @@ jobs:
           branch: ai-improvements-${{ github.sha }}
           base: main
           delete-branch: true
+          draft: false
 
