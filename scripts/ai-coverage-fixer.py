@@ -14,7 +14,7 @@ THRESHOLD = 80
 # Configure Gemini
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')  # Fallback for local testing
 genai.configure(api_key=GEMINI_API_KEY)
-gemini_model = genai.GenerativeModel('gemini-2.5-pro')  # Using stable version
+GEMINI_MODELS = ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-1.5-pro']
 
 # Debug mode - save AI responses for review instead of applying
 DEBUG_MODE = False
@@ -165,16 +165,22 @@ Please FIX the code to resolve these errors and ensure tests pass.
 
     generated_text = None
 
-    # Try Gemini
+    # Try Gemini models in order
+    for model_name in GEMINI_MODELS:
+        if generated_text is None:
+            try:
+                print(f'Trying Gemini {model_name}...')
+                model = genai.GenerativeModel(model_name)
+                response = model.generate_content(full_prompt)
+                generated_text = response.text.strip()
+                print(f'Gemini {model_name} response received')
+                break  # Success, stop trying
+            except Exception as e:
+                print(f'Gemini {model_name} failed: {e}')
+                continue
+
     if generated_text is None:
-        try:
-            print('Trying Gemini...')
-            response = gemini_model.generate_content(full_prompt)
-            generated_text = response.text.strip()
-            print('Gemini response received')
-        except Exception as e:
-            print(f'Gemini failed: {e}')
-            raise Exception('AI provider failed')
+        raise Exception('All AI providers failed')
 
     # Parse the JSON response
     try:
@@ -354,10 +360,15 @@ def check_coverage_and_fix():
                     print()
 
             except Exception as e:
-                print('Error in generation/verification step:', e)
-                last_error = str(e)
-
-            current_retry += 1
+                error_str = str(e)
+                # Check if it's a quota error - don't count as retry
+                if '429' in error_str or 'quota' in error_str.lower():
+                    print(f'Quota exceeded, trying different model without counting as retry...')
+                    continue  # Don't increment retry counter
+                else:
+                    print('Error in generation/verification step:', e)
+                    last_error = error_str
+                    current_retry += 1
 
         if not success:
             print('Failed to generate passing tests after retries. Keeping the last attempt.')

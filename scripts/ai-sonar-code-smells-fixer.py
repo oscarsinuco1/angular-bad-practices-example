@@ -487,10 +487,15 @@ def check_code_smells_and_fix():
                     print('Build/tests failed, retrying...')
 
             except Exception as e:
-                print('Error in fix generation/verification:', e)
-                last_error = str(e)
-
-            current_retry += 1
+                error_str = str(e)
+                # Check if it's a quota error - don't count as retry
+                if '429' in error_str or 'quota' in error_str.lower():
+                    print(f'Quota exceeded, trying different model without counting as retry...')
+                    continue  # Don't increment retry counter
+                else:
+                    print('Error in fix generation/verification:', e)
+                    last_error = error_str
+                    current_retry += 1
 
         if not success:
             print('Failed to generate passing fixes after retries.')
