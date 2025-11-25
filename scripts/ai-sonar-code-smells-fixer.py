@@ -522,14 +522,14 @@ def check_code_smells_and_fix():
             if not CI_MODE:
                 exit(1)
 
-        if CI_MODE:
-            # In CI, don't push or verify, just finish
-            print('Running in CI mode, skipping git operations and verification.')
-            return
-
         # After successful iteration, push and check progress with SonarCloud
         print('Pushing changes and checking progress with SonarCloud...')
         create_and_push_branch(list(modified_files))
+
+        if CI_MODE:
+            # In CI, the push will trigger another CI run with sonar scan
+            print('Running in CI mode, push will trigger sonar verification in next CI run.')
+            return
 
         print('Waiting for CI to complete...')
         time.sleep(180)  # Wait 5 min for CI
