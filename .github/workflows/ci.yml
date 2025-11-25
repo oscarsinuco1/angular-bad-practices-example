@@ -11,6 +11,7 @@ on:
     branches:
       - main
       - master
+      - sonar-fix
 
 jobs:
   # JOB 1: COMPILACIÓN (BUILD)
