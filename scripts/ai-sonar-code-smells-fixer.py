@@ -249,7 +249,7 @@ Please FIX the code to resolve these errors and ensure tests pass.
 def run_build():
     """Run build to check for compilation errors"""
     try:
-        result = subprocess.run(['ng', 'build', '--configuration', 'development'], capture_output=True, text=True, timeout=300)
+        result = subprocess.run(['npx', 'ng', 'build', '--configuration', 'development'], capture_output=True, text=True, timeout=300)
         if result.returncode == 0:
             return True, None
         else:
@@ -266,7 +266,7 @@ def run_tests():
     spinner_thread.start()
 
     try:
-        result = subprocess.run(['ng', 'test', '--watch=false', '--browsers=ChromeHeadlessCI', '--code-coverage', '--reporters=progress,junit,kjhtml'], capture_output=True, text=True, timeout=300)
+        result = subprocess.run(['npx', 'ng', 'test', '--watch=false', '--browsers=ChromeHeadlessCI', '--code-coverage', '--reporters=progress,junit,kjhtml'], capture_output=True, text=True, timeout=300)
         if result.returncode == 0:
             return True, None
         else:
