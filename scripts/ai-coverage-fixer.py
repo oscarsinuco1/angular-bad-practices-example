@@ -106,8 +106,7 @@ Angular 20 Testing Guidelines:
 - Animations: Use provideNoopAnimations() instead of NoopAnimationsModule.
 
 Angular Template Guidelines (for "cannot bind" errors):
-- Use CUSTOM_ELEMENTS_SCHEMA in test modules for custom elements
-- Add schemas: [CUSTOM_ELEMENTS_SCHEMA] to TestBed.configureTestingModule
+- Ensure import asociated component to test spec.
 - For Angular Material components, ensure proper imports in test module
 - For custom components, use NO_ERRORS_SCHEMA or CUSTOM_ELEMENTS_SCHEMA
 
