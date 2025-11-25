@@ -15,6 +15,7 @@ load_dotenv()
 
 SONAR_API_URL = "https://sonarcloud.io/api/issues/search"
 SONAR_TOKEN = os.getenv('SONAR_TOKEN')  # Fallback for local testing
+GITHUB_PAT = os.getenv('GITHUB_PAT')  # Personal Access Token for triggering CI
 PROJECT_KEY = "oscarsinuco1_angular-bad-practices-example"
 BRANCH_NAME = "sonar-fix"
 
@@ -345,8 +346,19 @@ def convert_issues_to_toml(issues):
     return toml_data
 
 def create_and_push_branch(modified_files):
-    """Create sonar-fix branch and push changes"""
+    """Create sonar-fix branch and push changes using PAT for authentication"""
     try:
+        # Get repo URL and modify with PAT if available
+        result = subprocess.run(['git', 'remote', 'get-url', 'origin'], capture_output=True, text=True, check=True)
+        repo_url = result.stdout.strip()
+
+        if GITHUB_PAT:
+            # Replace https://github.com/ with https://PAT@github.com/
+            if 'https://github.com/' in repo_url:
+                repo_url = repo_url.replace('https://github.com/', f'https://{GITHUB_PAT}@github.com/')
+            # Set the remote URL with PAT
+            subprocess.run(['git', 'remote', 'set-url', 'origin', repo_url], check=True)
+
         # Stash any changes
         subprocess.run(['git', 'stash'], capture_output=True)
         # Switch to main branch
@@ -364,7 +376,7 @@ def create_and_push_branch(modified_files):
         subprocess.run(['git', 'commit', '-m', 'fix: AI-generated code smell fixes'], check=True)
         # Push (force if needed)
         subprocess.run(['git', 'push', '-f', '-u', 'origin', BRANCH_NAME], check=True)
-        print(f'Pushed changes to branch {BRANCH_NAME}')
+        print(f'Pushed changes to branch {BRANCH_NAME} with PAT authentication')
     except subprocess.CalledProcessError as e:
         print(f'Git operation failed: {e}')
         raise
