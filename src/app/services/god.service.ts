@@ -1,12 +1,6 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Todo } from '../interfaces/todo.interface';
-
-const initialTodos: Todo[] = [
-  { id: 1, text: 'Create a bad practices project', isCompleted: true, priority: 'high' },
-  { id: 2, text: 'Add styling with Angular Material', isCompleted: true, priority: 'medium' },
-  { id: 3, text: 'Build a real-world example', isCompleted: false, priority: 'high' },
-  { id: 4, text: 'Clean up the code', isCompleted: false, priority: 'low' },
-];
+import { signal } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
@@ -14,14 +8,12 @@ const initialTodos: Todo[] = [
 export class GodService {
 
   // --- To-Do List Responsibility ---
-  private todos = signal<Todo[]>(JSON.parse(JSON.stringify(initialTodos)));
-
-  /**
-   * NOTE: This method is intended for testing purposes to reset state.
-   */
-  public resetTodosForTesting(): void {
-    this.todos.set(JSON.parse(JSON.stringify(initialTodos)));
-  }
+  private todos = signal<Todo[]>([
+    { id: 1, text: 'Create a bad practices project', isCompleted: true, priority: 'high' },
+    { id: 2, text: 'Add styling with Angular Material', isCompleted: true, priority: 'medium' },
+    { id: 3, text: 'Build a real-world example', isCompleted: false, priority: 'high' },
+    { id: 4, text: 'Clean up the code', isCompleted: false, priority: 'low' },
+  ]);
 
   getTodos() {
     this.log('Fetched all todos');
