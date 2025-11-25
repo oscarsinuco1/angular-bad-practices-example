@@ -1,4 +1,4 @@
-import { Component, input, computed } from '@angular/core';
+import { Component, model, computed } from '@angular/core';
 import { GodService } from '../../services/god.service';
 import { Todo } from '../../interfaces/todo.interface';
 import { TodoItemComponent } from '../todo-item/todo-item.component';
@@ -17,7 +17,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './important-todo-summary.component.scss'
 })
 export class ImportantTodoSummaryComponent {
-  godService = input.required<GodService>();
+  godService = model.required<GodService>();
   todos = computed(() => this.godService().getTodos()()); // Get todos as a signal
 
   // Duplicated Code: This method is identical to the one in TodoListComponent
