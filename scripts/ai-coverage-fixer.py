@@ -12,7 +12,8 @@ COVERAGE_SUMMARY_PATH = os.path.join(os.path.dirname(__file__), '../coverage/cov
 THRESHOLD = 80
 
 # Configure Gemini
-genai.configure(api_key='AIzaSyBmLydzon_Vjs0wTVrQovuHpyuEkj9YIWg')
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')  # Fallback for local testing
+genai.configure(api_key=GEMINI_API_KEY)
 gemini_model = genai.GenerativeModel('gemini-2.5-pro')  # Using stable version
 
 # Debug mode - save AI responses for review instead of applying
