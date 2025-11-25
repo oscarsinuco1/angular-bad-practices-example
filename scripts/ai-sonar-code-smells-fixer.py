@@ -526,35 +526,31 @@ def check_code_smells_and_fix():
         print('Pushing changes and checking progress with SonarCloud...')
         create_and_push_branch(list(modified_files))
 
-        if CI_MODE:
-            # In CI, the push will trigger another CI run with sonar scan
-            print('Running in CI mode, push will trigger sonar verification in next CI run.')
-            return
-
-        print('Waiting for CI to complete...')
-        time.sleep(180)  # Wait 5 min for CI
+        print('Waiting for CI to complete sonar scan...')
+        time.sleep(300 if CI_MODE else 180)  # Wait longer in CI (5 min vs 3 min)
 
         print('Checking if issues are resolved...')
         api_response = fetch_code_smells(branch=BRANCH_NAME)
         issues = parse_issues(api_response)
         if not issues:
             print('All code smells resolved!')
-            # Now check and improve coverage if needed
-            print('Checking code coverage...')
-            coverage = fetch_coverage(branch=BRANCH_NAME)
-            if coverage is not None:
-                print(f'Current coverage: {coverage}%')
-                if coverage < 80:
-                    print('Coverage below 80%, improving...')
-                    try:
-                        subprocess.run(['python', 'scripts/ai-coverage-fixer.py'], check=True)
-                        print('Coverage improvement completed.')
-                    except subprocess.CalledProcessError as e:
-                        print(f'Coverage improvement failed: {e}')
+            if not CI_MODE:
+                # Only run coverage improvement in local mode
+                print('Checking code coverage...')
+                coverage = fetch_coverage(branch=BRANCH_NAME)
+                if coverage is not None:
+                    print(f'Current coverage: {coverage}%')
+                    if coverage < 80:
+                        print('Coverage below 80%, improving...')
+                        try:
+                            subprocess.run(['python', 'scripts/ai-coverage-fixer.py'], check=True)
+                            print('Coverage improvement completed.')
+                        except subprocess.CalledProcessError as e:
+                            print(f'Coverage improvement failed: {e}')
+                    else:
+                        print('Coverage is good (>=80%).')
                 else:
-                    print('Coverage is good (>=80%).')
-            else:
-                print('Could not fetch coverage, skipping improvement.')
+                    print('Could not fetch coverage, skipping improvement.')
             return  # Exit successfully
 
         # Re-group remaining issues
