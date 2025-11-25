@@ -7,7 +7,11 @@ import sys
 import threading
 import itertools
 import toml
+from dotenv import load_dotenv
 import google.generativeai as genai
+
+# Load environment variables from .env file
+load_dotenv()
 
 SONAR_API_URL = "https://sonarcloud.io/api/issues/search"
 SONAR_TOKEN = os.getenv('SONAR_TOKEN')  # Fallback for local testing
@@ -18,7 +22,7 @@ BRANCH_NAME = "sonar-fix"
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')  # Fallback for local testing
 genai.configure(api_key=GEMINI_API_KEY)
 # GEMINI_MODELS = ['gemini-3-pro', 'gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.5-flash-lite']
-GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite']
+GEMINI_MODELS = ['gemini-3-pro', 'gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-1.5-pro']
 
 # Debug mode - save AI responses for review instead of applying
 DEBUG_MODE = False
@@ -204,11 +208,12 @@ The following errors occurred when running the tests:
 Please FIX the code to resolve these errors and ensure tests pass.
 """
 
-    # Save the prompt
-    prompt_filename = 'ai_prompt_{}.txt'.format(int(time.time()))
-    with open(prompt_filename, 'w') as f:
-        f.write(full_prompt)
-    print('Prompt saved to {}'.format(prompt_filename))
+    # Save the prompt (for debugging)
+    if DEBUG_MODE:
+        prompt_filename = 'ai_prompt_{}.txt'.format(int(time.time()))
+        with open(prompt_filename, 'w') as f:
+            f.write(full_prompt)
+        print('Prompt saved to {}'.format(prompt_filename))
 
     print('Generating tests with AI...')
 
@@ -247,14 +252,16 @@ Please FIX the code to resolve these errors and ensure tests pass.
         generated_text = re.sub(r'```\s*$', '', generated_text)
         generated_text = generated_text.strip()
 
-        print(f"Attempting to parse response: {generated_text[:200]}...")
+        if DEBUG_MODE:
+            print(f"Attempting to parse response: {generated_text[:200]}...")
         # Parse as Python dict
         fixed_files = ast.literal_eval(generated_text)
         if not isinstance(fixed_files, dict):
             raise ValueError("Expected dict")
         # Convert to list in the order of files_to_fix
         component_codes = [fixed_files.get(file_path, "") for file_path in files_to_fix]
-        print(f"Successfully parsed {len(component_codes)} component codes")
+        if DEBUG_MODE:
+            print(f"Successfully parsed {len(component_codes)} component codes")
     except Exception as e:
         print(f"Parsing failed: {e}")
         print(f"Raw response start: {generated_text[:500]}...")
@@ -468,6 +475,7 @@ def check_code_smells_and_fix():
 
                 component_codes = generate_fixes_with_ai(issues_list, grouped_issues, files_to_fix, last_error, initial_error, failed_models)
 
+                # Save AI response for review (debug mode)
                 if DEBUG_MODE:
                     response_data = {
                         'component_codes': component_codes,

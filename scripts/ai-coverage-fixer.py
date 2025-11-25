@@ -6,7 +6,11 @@ import time
 import sys
 import threading
 import itertools
+from dotenv import load_dotenv
 import google.generativeai as genai
+
+# Load environment variables from .env file
+load_dotenv()
 
 COVERAGE_SUMMARY_PATH = os.path.join(os.path.dirname(__file__), '../coverage/coverage-summary.json')
 THRESHOLD = 80
@@ -14,7 +18,7 @@ THRESHOLD = 80
 # Configure Gemini
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')  # Fallback for local testing
 genai.configure(api_key=GEMINI_API_KEY)
-GEMINI_MODELS = ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-1.5-pro']
+GEMINI_MODELS = ['gemini-3-pro', 'gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-1.5-pro']
 
 # Debug mode - save AI responses for review instead of applying
 DEBUG_MODE = False
@@ -157,11 +161,12 @@ The following errors occurred when running the tests:
 Please FIX the code to resolve these errors and ensure tests pass.
 """
 
-    # Save the prompt
-    prompt_filename = 'ai_prompt_{}.txt'.format(int(time.time()))
-    with open(prompt_filename, 'w') as f:
-        f.write(full_prompt)
-    print('Prompt saved to {}'.format(prompt_filename))
+    # Save the prompt (for debugging)
+    if DEBUG_MODE:
+        prompt_filename = 'ai_prompt_{}.txt'.format(int(time.time()))
+        with open(prompt_filename, 'w') as f:
+            f.write(full_prompt)
+        print('Prompt saved to {}'.format(prompt_filename))
 
     print('Generating tests with AI...')
 
@@ -199,11 +204,13 @@ Please FIX the code to resolve these errors and ensure tests pass.
         generated_text = re.sub(r'```\s*$', '', generated_text)
         generated_text = generated_text.strip()
 
-        print(f"Attempting to parse JSON: {generated_text[:200]}...")
+        if DEBUG_MODE:
+            print(f"Attempting to parse JSON: {generated_text[:200]}...")
         parsed = json.loads(generated_text)
         spec_codes = parsed.get('spec_codes', [])
         component_codes = parsed.get('component_codes', [])
-        print(f"Successfully parsed {len(spec_codes)} spec codes and {len(component_codes)} component codes")
+        if DEBUG_MODE:
+            print(f"Successfully parsed {len(spec_codes)} spec codes and {len(component_codes)} component codes")
     except json.JSONDecodeError as e:
         print(f"JSON parsing failed: {e}")
         print(f"Raw response start: {generated_text[:500]}...")
@@ -321,13 +328,13 @@ def check_coverage_and_fix():
             try:
                 spec_codes, component_codes = generate_tests_with_ai(file_contents, last_error, failed_models)
 
+                # Save AI response for review (debug mode) or logging
+                response_data = {
+                    'spec_codes': spec_codes,
+                    'component_codes': component_codes,
+                    'file_paths': [fp for fp, _ in file_contents]
+                }
                 if DEBUG_MODE:
-                    # Save AI response for review instead of applying
-                    response_data = {
-                        'spec_codes': spec_codes,
-                        'component_codes': component_codes,
-                        'file_paths': [fp for fp, _ in file_contents]
-                    }
                     response_filename = f'ai_response_{int(time.time())}.json'
                     with open(response_filename, 'w') as f:
                         json.dump(response_data, f, indent=2)
@@ -335,14 +342,6 @@ def check_coverage_and_fix():
                     print('Please review the response and apply manually, or set DEBUG_MODE = False to auto-apply')
                     return  # Don't proceed with applying changes
                 else:
-                    response_data = {
-                        'spec_codes': spec_codes,
-                        'component_codes': component_codes,
-                        'file_paths': [fp for fp, _ in file_contents]
-                    }
-                    response_filename = f'ai_response_{int(time.time())}.json'
-                    with open(response_filename, 'w') as f:
-                        json.dump(response_data, f, indent=2)
                     print(f"About to write {len(spec_codes)} spec files and {len(component_codes)} component files")
                     for i, (file_path, _) in enumerate(file_contents):
                         if i < len(spec_codes):
