@@ -125,14 +125,15 @@ Always modify input signals to model signals in the component code for testabili
 
 Example: Use this.example()?.test instead of this.example().test for null safety.
 
-Output the response only in JSON format with keys:
-- 'spec_codes': array of complete Typescript codes for the *.spec.ts files, in the SAME ORDER as the files listed above (spec_codes[0] for File 1, spec_codes[1] for File 2, etc.)
-- 'component_codes': (optional) array of modified Typescript codes for the original components if changes are needed, in the same order
+Output the response only as a Python dict where keys are the file paths (exactly as listed above for spec files and component files) and values are the complete file contents as strings.
 
 Example:
-{{"spec_codes": ["import {{ ... }} from ...\\n...", "..."], "component_codes": ["import {{ ... }} from ...\\n...", "..."]}}
+{
+  "src/app/components/component-a/component-a.component.spec.ts": "import { ... } from ...\\n...",
+  "src/app/components/component-a/component-a.component.ts": "import { ... } from ...\\n..."
+}
 
-REMENBER: response only contains json format, not text, not recommendations, only json format
+REMEMBER: response only contains the Python dict, not text, not recommendations, only the dict
 
 COMPLETE APPLICATION CONTEXT:
 """
@@ -195,31 +196,32 @@ Please FIX the code to resolve these errors and ensure tests pass.
     if generated_text is None:
         raise Exception('All AI providers failed')
 
-    # Parse the JSON response
+    # Parse the response (AI is outputting Python-like syntax)
     try:
-        # Strip markdown code blocks if present (more robust)
+        import ast
+        # Strip markdown code blocks if present
         import re
-        # Remove ```json and ``` with optional language specifier
-        generated_text = re.sub(r'^```(?:json)?\s*', '', generated_text)
+        # Remove ``` and ``` with optional language specifier
+        generated_text = re.sub(r'^```(?:toml|python)?\s*', '', generated_text)
         generated_text = re.sub(r'```\s*$', '', generated_text)
         generated_text = generated_text.strip()
 
         if DEBUG_MODE:
-            print(f"Attempting to parse JSON: {generated_text[:200]}...")
-        parsed = json.loads(generated_text)
-        spec_codes = parsed.get('spec_codes', [])
-        component_codes = parsed.get('component_codes', [])
+            print(f"Attempting to parse response: {generated_text[:200]}...")
+        # Parse as Python dict
+        fixed_files = ast.literal_eval(generated_text)
+        if not isinstance(fixed_files, dict):
+            raise ValueError("Expected dict")
         if DEBUG_MODE:
-            print(f"Successfully parsed {len(spec_codes)} spec codes and {len(component_codes)} component codes")
-    except json.JSONDecodeError as e:
-        print(f"JSON parsing failed: {e}")
+            print(f"Successfully parsed {len(fixed_files)} file codes")
+    except Exception as e:
+        print(f"Parsing failed: {e}")
         print(f"Raw response start: {generated_text[:500]}...")
         print(f"Raw response end: {generated_text[-500:]}...")
-        # Fallback if not JSON
-        spec_codes = [generated_text]
-        component_codes = []
+        # Fallback
+        fixed_files = {}
 
-    return spec_codes, component_codes
+    return fixed_files
 
 def run_build():
     """Run build to check for compilation errors"""
@@ -326,12 +328,11 @@ def check_coverage_and_fix():
             print()
 
             try:
-                spec_codes, component_codes = generate_tests_with_ai(file_contents, last_error, failed_models)
+                fixed_files = generate_tests_with_ai(file_contents, last_error, failed_models)
 
                 # Save AI response for review (debug mode) or logging
                 response_data = {
-                    'spec_codes': spec_codes,
-                    'component_codes': component_codes,
+                    'fixed_files': fixed_files,
                     'file_paths': [fp for fp, _ in file_contents]
                 }
                 if DEBUG_MODE:
@@ -342,20 +343,11 @@ def check_coverage_and_fix():
                     print('Please review the response and apply manually, or set DEBUG_MODE = False to auto-apply')
                     return  # Don't proceed with applying changes
                 else:
-                    print(f"About to write {len(spec_codes)} spec files and {len(component_codes)} component files")
-                    for i, (file_path, _) in enumerate(file_contents):
-                        if i < len(spec_codes):
-                            spec_file = file_path.replace('.ts', '.spec.ts')
-                            print(f'Writing generated tests to {spec_file}... (length: {len(spec_codes[i])})')
-                            with open(spec_file, 'w') as f:
-                                f.write(spec_codes[i])
-
-                        if i < len(component_codes) and component_codes[i]:
-                            print(f'Applying changes to component {file_path}... (length: {len(component_codes[i])})')
-                            with open(file_path, 'w') as f:
-                                f.write(component_codes[i])
-                        else:
-                            print(f'No component changes for {file_path}')
+                    print(f"About to write {len(fixed_files)} files")
+                    for file_path, content in fixed_files.items():
+                        print(f'Writing to {file_path}... (length: {len(content)})')
+                        with open(file_path, 'w') as f:
+                            f.write(content)
 
                 print_progress_bar(total_coverage, THRESHOLD, 'Running build and tests...')
                 print()
