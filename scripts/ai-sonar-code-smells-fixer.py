@@ -537,10 +537,13 @@ def check_code_smells_and_fix():
                 print(f"About to apply fixes to {len(component_codes)} files")
                 for i, file_path in enumerate(files_to_fix):
                     if i < len(component_codes) and component_codes[i]:
-                        print(f'Applying fix to {file_path}...')
+                        print(f'Applying fix to {file_path}... (content length: {len(component_codes[i])})')
                         with open(file_path, 'w') as f:
                             f.write(component_codes[i])
                         modified_files.add(file_path)
+                        print(f'Fix applied to {file_path}')
+                    else:
+                        print(f'No fix for {file_path} at index {i}')
 
                 print('Running build and tests...')
                 success, last_error = run_build_and_tests()
