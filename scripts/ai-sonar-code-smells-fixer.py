@@ -345,6 +345,38 @@ def convert_issues_to_toml(issues):
         toml_data.append(toml.dumps(toml_issue))
     return toml_data
 
+def dispatch_ci_workflow():
+    """Dispatch the CI workflow via GitHub API"""
+    try:
+        owner = 'oscarsinuco1'
+        repo = 'angular-bad-practices-example'
+        workflow_id = 'ci.yml'
+        url = f'https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches'
+
+        data = {
+            "ref": BRANCH_NAME,
+            "inputs": {
+                "deployment_target": "production",
+                "reason": "Dispatch CI after push to sonar-fix branch"
+            }
+        }
+
+        cmd = [
+            'curl', '-X', 'POST',
+            '-H', 'Accept: application/vnd.github.v3+json',
+            '-H', f'Authorization: token {GITHUB_PAT}',
+            '-d', json.dumps(data),
+            url
+        ]
+
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode == 0:
+            print('CI workflow dispatched successfully')
+        else:
+            print(f'Failed to dispatch CI workflow: {result.stderr}')
+    except Exception as e:
+        print(f'Error dispatching CI workflow: {e}')
+
 def create_and_push_branch(modified_files):
     """Create sonar-fix branch and push changes using PAT for authentication"""
     try:
@@ -377,6 +409,9 @@ def create_and_push_branch(modified_files):
         # Push (force if needed)
         subprocess.run(['git', 'push', '-f', '-u', 'origin', BRANCH_NAME], check=True)
         print(f'Pushed changes to branch {BRANCH_NAME} with PAT authentication')
+
+        # Dispatch the CI workflow
+        dispatch_ci_workflow()
     except subprocess.CalledProcessError as e:
         print(f'Git operation failed: {e}')
         raise
