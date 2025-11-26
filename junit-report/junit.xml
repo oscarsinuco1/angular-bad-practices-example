@@ -1,12 +1,48 @@
 <?xml version="1.0"?>
-<testsuite name="Chrome Headless 142.0.0.0 (Linux 0.0.0)" package="" timestamp="2025-11-25T15:26:22" id="0" hostname="fedora" tests="1" errors="0" failures="0" time="0.064">
+<testsuite name="Chrome Headless 142.0.0.0 (Linux 0.0.0)" package="" timestamp="2025-11-26T14:52:16" id="0" hostname="runnervmg1sw1" tests="33" errors="0" failures="0" time="0.195">
   <properties>
     <property name="browser.fullName" value="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/142.0.0.0 Safari/537.36"/>
   </properties>
-  <testcase name="App should create the app" time="0.064" classname="App"/>
+  <testcase name="GodService Todo Management should add a new todo" time="0.003" classname="GodService Todo Management"/>
+  <testcase name="GodService Todo Management should not change the list when deleting a non-existent todo" time="0.001" classname="GodService Todo Management"/>
+  <testcase name="GodService Todo Management should delete a todo by id" time="0.001" classname="GodService Todo Management"/>
+  <testcase name="GodService Todo Management should return initial todos" time="0.001" classname="GodService Todo Management"/>
+  <testcase name="GodService Todo Management should not change the list when toggling a non-existent todo" time="0" classname="GodService Todo Management"/>
+  <testcase name="GodService Todo Management should toggle a todo completion status and not affect others" time="0.001" classname="GodService Todo Management"/>
+  <testcase name="GodService Product Management should log when adding a product" time="0.001" classname="GodService Product Management"/>
+  <testcase name="GodService Product Management should return a list of products" time="0" classname="GodService Product Management"/>
+  <testcase name="GodService User Management should log when adding a user" time="0" classname="GodService User Management"/>
+  <testcase name="GodService User Management should return a list of users" time="0.001" classname="GodService User Management"/>
+  <testcase name="GodService Configuration Management should log when updating a configuration" time="0.001" classname="GodService Configuration Management"/>
+  <testcase name="GodService Configuration Management should get a configuration value for a key" time="0" classname="GodService Configuration Management"/>
+  <testcase name="GodService should be created" time="0.001" classname="GodService"/>
+  <testcase name="GodService Logging should log messages with a specific format" time="0" classname="GodService Logging"/>
+  <testcase name="TodoItemComponent getPriorityClass should return &quot;priority-low&quot; for low priority" time="0.04" classname="TodoItemComponent getPriorityClass"/>
+  <testcase name="TodoItemComponent getPriorityClass should return &quot;priority-medium&quot; for medium priority" time="0.016" classname="TodoItemComponent getPriorityClass"/>
+  <testcase name="TodoItemComponent getPriorityClass should return &quot;priority-high&quot; for high priority" time="0.006" classname="TodoItemComponent getPriorityClass"/>
+  <testcase name="TodoItemComponent getPriorityClass should return &quot;priority-low&quot; by default for unknown priorities" time="0.005" classname="TodoItemComponent getPriorityClass"/>
+  <testcase name="TodoItemComponent should apply the .completed class when todo is completed" time="0.005" classname="TodoItemComponent"/>
+  <testcase name="TodoItemComponent should create" time="0.004" classname="TodoItemComponent"/>
+  <testcase name="TodoItemComponent should display the todo text" time="0.004" classname="TodoItemComponent"/>
+  <testcase name="TodoItemComponent should call onToggle and the service when the checkbox value changes" time="0.004" classname="TodoItemComponent"/>
+  <testcase name="TodoItemComponent should set the checkbox state based on todo.isCompleted" time="0.004" classname="TodoItemComponent"/>
+  <testcase name="TodoItemComponent should call onDelete and the service when the delete button is clicked" time="0.004" classname="TodoItemComponent"/>
+  <testcase name="App should create the app" time="0.035" classname="App"/>
+  <testcase name="ImportantTodoSummaryComponent should create" time="0.003" classname="ImportantTodoSummaryComponent"/>
+  <testcase name="ImportantTodoSummaryComponent should reactively update the view when the todo list changes" time="0.012" classname="ImportantTodoSummaryComponent"/>
+  <testcase name="ImportantTodoSummaryComponent should display a message when there are no important todos" time="0.003" classname="ImportantTodoSummaryComponent"/>
+  <testcase name="ImportantTodoSummaryComponent should display only high-priority, incomplete todos" time="0.007" classname="ImportantTodoSummaryComponent"/>
+  <testcase name="ImportantTodoSummaryComponent filterAndProcessTodos should filter by completion status" time="0.007" classname="ImportantTodoSummaryComponent filterAndProcessTodos"/>
+  <testcase name="ImportantTodoSummaryComponent filterAndProcessTodos should filter by both priority and completion status" time="0.015" classname="ImportantTodoSummaryComponent filterAndProcessTodos"/>
+  <testcase name="ImportantTodoSummaryComponent filterAndProcessTodos should filter by priority" time="0.006" classname="ImportantTodoSummaryComponent filterAndProcessTodos"/>
+  <testcase name="ImportantTodoSummaryComponent filterAndProcessTodos should return all todos sorted by id when no filters are applied" time="0.004" classname="ImportantTodoSummaryComponent filterAndProcessTodos"/>
   <system-out>
-    <![CDATA[Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: App component initialized.'
-,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetching all users...'
+    <![CDATA[Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Adding product: Monitor'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Adding user: David'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Updating config for key: timeout with value: 5000'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Getting config for key: apiKey'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Test log message'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: App component initialized.'
 
 ]]>
   </system-out>
