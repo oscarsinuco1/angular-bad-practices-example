@@ -109,6 +109,7 @@ jobs:
             -Dsonar.projectKey=oscarsinuco1_angular-bad-practices-example
             -Dsonar.organization=${{ github.repository_owner }}
             -Dsonar.branch=${{ github.ref_name }}
+            -Dsonar.branch.name=${{ github.ref_name }}
             -Dsonar.sources=src
             -Dsonar.tests=src
             -Dsonar.test.inclusions=**/*.spec.ts
