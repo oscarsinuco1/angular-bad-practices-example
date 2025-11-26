@@ -1,0 +1,13 @@
+<div class="todo-list-container">
+  @if (allTodos().length === 0) {
+    <p>No to-do items yet. Add some above!</p>
+  } @else {
+    <mat-list>
+      @for (todo of allTodos(); track todo.id) {
+        <mat-list-item>
+          <app-todo-item [todo]="todo" [godService]="godService()"></app-todo-item>
+        </mat-list-item>
+      }
+    </mat-list>
+  }
+</div>

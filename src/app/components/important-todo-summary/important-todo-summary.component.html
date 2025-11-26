@@ -1,0 +1,13 @@
+<div class="important-todo-summary-container">
+  @if (importantTodos().length === 0) {
+    <p>No important outstanding to-do items!</p>
+  } @else {
+    <mat-list>
+      @for (todo of importantTodos(); track todo.id) {
+        <mat-list-item>
+          <app-todo-item [todo]="todo" [godService]="godService()"></app-todo-item>
+        </mat-list-item>
+      }
+    </mat-list>
+  }
+</div>

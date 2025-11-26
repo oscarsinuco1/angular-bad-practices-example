@@ -1,0 +1,8 @@
+<div class="todo-item" [ngClass]="getPriorityClass()">
+  <mat-checkbox [checked]="todo().isCompleted" (change)="onToggle(todo().id)">
+    <span [class.completed]="todo().isCompleted">{{ todo().text }}</span>
+  </mat-checkbox>
+  <button mat-icon-button color="warn" (click)="onDelete(todo().id)">
+    <mat-icon>delete</mat-icon>
+  </button>
+</div>

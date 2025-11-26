@@ -1,0 +1,32 @@
+<div class="product-display">
+  <h2>Product Details</h2>
+  <div [ngSwitch]="productType()">
+    <div *ngSwitchCase="'electronics'">
+      <h3>Electronics Product</h3>
+      <p>Name: {{ productDetails()?.name }}</p>
+      <p>Brand: {{ productDetails()?.brand }}</p>
+      <p>Warranty: {{ productDetails()?.warranty }}</p>
+    </div>
+    <div *ngSwitchCase="'clothing'">
+      <h3>Clothing Product</h3>
+      <p>Item: {{ productDetails()?.item }}</p>
+      <p>Size: {{ productDetails()?.size }}</p>
+      <p>Material: {{ productDetails()?.material }}</p>
+    </div>
+    <div *ngSwitchCase="'book'">
+      <h3>Book Product</h3>
+      <p>Title: {{ productDetails()?.title }}</p>
+      <p>Author: {{ productDetails()?.author }}</p>
+      <p>ISBN: {{ productDetails()?.isbn }}</p>
+    </div>
+    <div *ngSwitchCase="'food'">
+      <h3>Food Product</h3>
+      <p>Item: {{ productDetails()?.item }}</p>
+      <p>Expires: {{ productDetails()?.expiryDate }}</p>
+      <p>Calories: {{ productDetails()?.calories }}</p>
+    </div>
+    <div *ngSwitchDefault>
+      <p>Unknown product type or no product selected.</p>
+    </div>
+  </div>
+</div>

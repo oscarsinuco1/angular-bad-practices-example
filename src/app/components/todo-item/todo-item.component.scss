@@ -1,0 +1,29 @@
+.todo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.completed {
+  text-decoration: line-through;
+  color: #888;
+}
+
+.priority-high {
+  color: #f44336; // Material Red
+  font-weight: bold;
+}
+
+.priority-medium {
+  color: #ff9800; // Material Orange
+}
+
+.priority-low {
+  color: #4caf50; // Material Green
+}

@@ -1,0 +1,34 @@
+<div class="main-todo-container">
+  <mat-toolbar color="primary">
+    <span>Real-world Bad Practices: To-Do List</span>
+  </mat-toolbar>
+
+  <mat-card class="todo-card">
+    <mat-card-header>
+      <mat-card-title>Add New To-Do</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <app-todo-form [godService]="godService"></app-todo-form>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="todo-card">
+    <mat-card-header>
+      <mat-card-title>All To-Do Items</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <app-todo-list [godService]="godService"></app-todo-list>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="todo-card">
+    <mat-card-header>
+      <mat-card-title>Important To-Do Summary</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <app-important-todo-summary [godService]="godService"></app-important-todo-summary>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<router-outlet />

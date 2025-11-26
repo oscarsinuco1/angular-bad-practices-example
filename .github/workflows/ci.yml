@@ -1,0 +1,225 @@
+name: SonarCloud Analysis (Multi-Job Artifact Flow - Option 2)
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - sonar-fix
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+      - master
+      - sonar-fix
+  workflow_dispatch:
+
+jobs:
+  # JOB 1: COMPILACIÓN (BUILD)
+  build_app:
+    name: 1. Build Application
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment (22.12.0)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Build
+        run: npm run build -- --base-href /angular-bad-practices-example/${{ github.sha }}/
+        
+      - name: Upload Dist Folder Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-artifact
+          path: dist/bad-practices-project/browser
+          retention-days: 1
+
+  # JOB 2: EJECUCIÓN DE PRUEBAS (TESTS)
+  run_tests:
+    name: 2. Run Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment (22.12.0)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+          
+      - name: Run Tests and Generate Coverage Report
+        run: |
+          echo "Running unit tests and generating coverage report..."
+          npx ng test --no-watch --code-coverage --browsers=ChromeHeadlessCI
+
+      - name: Upload Coverage Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-artifact
+          path: coverage
+          retention-days: 1
+          
+  # JOB 3: ESCANEO SONARCLOUD
+  sonar_scan_code:
+    name: 3. SonarCloud Scan & Normalization
+    runs-on: ubuntu-latest
+    needs: run_tests
+    outputs:
+      run_id: ${{ github.sha }}
+      
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js Environment (22.12.0)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+          
+      - name: Download Coverage Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-artifact
+          path: coverage
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2.2.0
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=oscarsinuco1_angular-bad-practices-example
+            -Dsonar.organization=${{ github.repository_owner }}
+            -Dsonar.branch=${{ github.ref_name }}
+            -Dsonar.branch.name=${{ github.ref_name }}
+            -Dsonar.sources=src
+            -Dsonar.tests=src
+            -Dsonar.test.inclusions=**/*.spec.ts
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+
+  # JOB 4: DESPLIEGUE A GITHUB PAGES
+  deploy_pages:
+    name: 4. Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: [build_app, run_tests] # Wait for build and tests
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Dist Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-artifact
+          path: dist/bad-practices-project/browser
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist/bad-practices-project/browser
+          destination_dir: ${{ github.sha }}
+          keep_files: true # Keep other versions
+
+  # JOB 5: MEJORA DE COBERTURA Y CODE SMELLS CON IA
+  improve_coverage_and_smells:
+    name: 5. AI Coverage & Code Smells Improver
+    runs-on: ubuntu-latest
+    needs: sonar_scan_code
+    if: github.ref != 'refs/heads/sonar-fix'
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # For git operations
+
+      - name: Setup Node.js Environment (22.12.0)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Install Python Dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Download Coverage Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-artifact
+          path: coverage
+
+      - name: Run AI Coverage Fixer
+        id: coverage_fixer
+        run: |
+          python scripts/ai-coverage-fixer.py
+        continue-on-error: true
+
+      - name: Commit Coverage Changes
+        run: |
+          if git diff --quiet; then
+            echo "No coverage changes"
+          else
+            git add .
+            git -c author.name=oscarsinuco1 -c author.email=oscarsinuco1@users.noreply.github.com -c committer.name=GitHub -c committer.email=noreply@github.com commit -m "test: AI-generated coverage improvements" || echo "No changes to commit"
+          fi
+        continue-on-error: true
+
+      - name: Run AI Code Smells Fixer
+        id: smells_fixer
+        run: |
+          python scripts/ai-sonar-code-smells-fixer.py
+        continue-on-error: true
+
+      - name: Commit Code Smells Changes
+        run: |
+          if git diff --quiet; then
+            echo "No code smells changes"
+          else
+            git add .
+            git -c author.name=oscarsinuco1 -c author.email=oscarsinuco1@users.noreply.github.com -c committer.name=GitHub -c committer.email=noreply@github.com commit -m "fix: AI-generated code smell fixes" || echo "No changes to commit"
+          fi
+        continue-on-error: true
+
+      - name: AI Improvements Completed
+        run: echo "AI scripts have completed. Changes pushed to sonar-fix branch."
+

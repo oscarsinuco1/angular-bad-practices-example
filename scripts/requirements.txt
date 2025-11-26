@@ -1,0 +1,4 @@
+google-generativeai
+toml
+python-dotenv
+requests
