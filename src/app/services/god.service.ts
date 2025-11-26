@@ -1,6 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { Todo } from '../interfaces/todo.interface';
-import { signal } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
@@ -8,7 +7,7 @@ import { signal } from '@angular/core';
 export class GodService {
 
   // --- To-Do List Responsibility ---
-  private todos = signal<Todo[]>([
+  private readonly todos = signal<Todo[]>([
     { id: 1, text: 'Create a bad practices project', isCompleted: true, priority: 'high' },
     { id: 2, text: 'Add styling with Angular Material', isCompleted: true, priority: 'medium' },
     { id: 3, text: 'Build a real-world example', isCompleted: false, priority: 'high' },
