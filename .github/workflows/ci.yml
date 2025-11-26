@@ -5,20 +5,14 @@ on:
     branches:
       - main
       - master
+      - sonar-fix
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
       - main
       - master
+      - sonar-fix
   workflow_dispatch:
-    inputs:
-      deployment_target:
-        description: 'Target environment (e.g., staging, production)'
-        required: true
-        default: 'staging'
-      reason:
-        description: 'Reason for dispatching'
-        required: false
 
 jobs:
   # JOB 1: COMPILACIÓN (BUILD)
