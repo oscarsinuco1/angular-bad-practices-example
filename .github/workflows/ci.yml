@@ -108,17 +108,11 @@ jobs:
           args: >
             -Dsonar.projectKey=oscarsinuco1_angular-bad-practices-example
             -Dsonar.organization=${{ github.repository_owner }}
+            -Dsonar.branch=${{ github.ref_name }}
             -Dsonar.sources=src
             -Dsonar.tests=src
             -Dsonar.test.inclusions=**/*.spec.ts
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-        
-      - name: Normalization and Upload to Firestore
-        run: |
-          echo "--------------------------------------------------------"
-          echo "Normalization and Upload for Run ID: ${{ github.sha }}"
-          echo "--------------------------------------------------------"
-          # node ./scripts/normalize-reports.js --runId ${{ github.sha }}
 
   # JOB 4: DESPLIEGUE A GITHUB PAGES
   deploy_pages:
