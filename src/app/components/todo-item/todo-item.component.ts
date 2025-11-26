@@ -1,4 +1,4 @@
-import { Component, input, Input } from '@angular/core'; // Added Input
+import { Component, model, Input } from '@angular/core'; // Added Input, changed input to model
 import { Todo } from '../../interfaces/todo.interface';
 import { GodService } from '../../services/god.service';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -19,7 +19,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './todo-item.component.scss'
 })
 export class TodoItemComponent {
-  todo = input.required<Todo>();
+  todo = model.required<Todo>();
   @Input() godService!: GodService; // Changed to @Input()
 
   onToggle(id: number) {
