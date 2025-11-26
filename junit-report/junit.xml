@@ -1,12 +1,78 @@
 <?xml version="1.0"?>
-<testsuite name="Chrome Headless 142.0.0.0 (Linux 0.0.0)" package="" timestamp="2025-11-25T15:26:22" id="0" hostname="fedora" tests="1" errors="0" failures="0" time="0.064">
+<testsuite name="Chrome Headless 142.0.0.0 (Linux 0.0.0)" package="" timestamp="2025-11-26T16:12:32" id="0" hostname="runnervmg1sw1" tests="34" errors="0" failures="0" time="0.221">
   <properties>
     <property name="browser.fullName" value="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/142.0.0.0 Safari/537.36"/>
   </properties>
-  <testcase name="App should create the app" time="0.064" classname="App"/>
+  <testcase name="TodoItemComponent getPriorityClass should return &quot;priority-low&quot; for low priority todos" time="0.039" classname="TodoItemComponent getPriorityClass"/>
+  <testcase name="TodoItemComponent getPriorityClass should return &quot;priority-high&quot; for high priority todos" time="0.007" classname="TodoItemComponent getPriorityClass"/>
+  <testcase name="TodoItemComponent getPriorityClass should return &quot;priority-medium&quot; for medium priority todos" time="0.006" classname="TodoItemComponent getPriorityClass"/>
+  <testcase name="TodoItemComponent should apply the &quot;completed&quot; class when the todo is completed" time="0.006" classname="TodoItemComponent"/>
+  <testcase name="TodoItemComponent should call onToggle when the checkbox state changes" time="0.019" classname="TodoItemComponent"/>
+  <testcase name="TodoItemComponent should create" time="0.005" classname="TodoItemComponent"/>
+  <testcase name="TodoItemComponent should call onDelete when the delete button is clicked" time="0.006" classname="TodoItemComponent"/>
+  <testcase name="TodoItemComponent should display the todo text" time="0.004" classname="TodoItemComponent"/>
+  <testcase name="TodoItemComponent should reflect the todo completion status in the checkbox" time="0.007" classname="TodoItemComponent"/>
+  <testcase name="App should create the app" time="0.045" classname="App"/>
+  <testcase name="ImportantTodoSummaryComponent logic importantTodos computed signal should be empty if there are no high-priority, incomplete todos" time="0.011" classname="ImportantTodoSummaryComponent logic importantTodos computed signal"/>
+  <testcase name="ImportantTodoSummaryComponent logic importantTodos computed signal should contain only high-priority, incomplete todos" time="0.007" classname="ImportantTodoSummaryComponent logic importantTodos computed signal"/>
+  <testcase name="ImportantTodoSummaryComponent logic importantTodos computed signal should update automatically when the source signal changes" time="0.007" classname="ImportantTodoSummaryComponent logic importantTodos computed signal"/>
+  <testcase name="ImportantTodoSummaryComponent logic filterAndProcessTodos should filter by completion status" time="0.007" classname="ImportantTodoSummaryComponent logic filterAndProcessTodos"/>
+  <testcase name="ImportantTodoSummaryComponent logic filterAndProcessTodos should return all todos when no filters are applied" time="0.005" classname="ImportantTodoSummaryComponent logic filterAndProcessTodos"/>
+  <testcase name="ImportantTodoSummaryComponent logic filterAndProcessTodos should filter by both priority and completion status" time="0.007" classname="ImportantTodoSummaryComponent logic filterAndProcessTodos"/>
+  <testcase name="ImportantTodoSummaryComponent logic filterAndProcessTodos should filter by priority" time="0.006" classname="ImportantTodoSummaryComponent logic filterAndProcessTodos"/>
+  <testcase name="ImportantTodoSummaryComponent template rendering should display the list of important todos when they exist" time="0.006" classname="ImportantTodoSummaryComponent template rendering"/>
+  <testcase name="ImportantTodoSummaryComponent template rendering should display the &quot;no important items&quot; message when importantTodos is empty" time="0.002" classname="ImportantTodoSummaryComponent template rendering"/>
+  <testcase name="ImportantTodoSummaryComponent should create" time="0.002" classname="ImportantTodoSummaryComponent"/>
+  <testcase name="GodService Todo List Responsibility getTodos should return a writable signal with initial todos" time="0.002" classname="GodService Todo List Responsibility"/>
+  <testcase name="GodService Todo List Responsibility addTodo should add a new todo to the signal" time="0.001" classname="GodService Todo List Responsibility"/>
+  <testcase name="GodService Todo List Responsibility deleteTodo should not change the list if id does not exist" time="0.001" classname="GodService Todo List Responsibility"/>
+  <testcase name="GodService Todo List Responsibility toggleTodo should flip the isCompleted status of an existing todo" time="0.001" classname="GodService Todo List Responsibility"/>
+  <testcase name="GodService Todo List Responsibility toggleTodo should not change the list if id does not exist" time="0.001" classname="GodService Todo List Responsibility"/>
+  <testcase name="GodService Todo List Responsibility deleteTodo should remove an existing todo" time="0.001" classname="GodService Todo List Responsibility"/>
+  <testcase name="GodService Other Responsibilities getUsers should return a list of users and log the action" time="0.002" classname="GodService Other Responsibilities"/>
+  <testcase name="GodService Other Responsibilities addUser should log the action" time="0.001" classname="GodService Other Responsibilities"/>
+  <testcase name="GodService Other Responsibilities addProduct should log the action" time="0.001" classname="GodService Other Responsibilities"/>
+  <testcase name="GodService Other Responsibilities getProducts should return a list of products and log the action" time="0.001" classname="GodService Other Responsibilities"/>
+  <testcase name="GodService Other Responsibilities getConfig should return a config value string and log the action" time="0.001" classname="GodService Other Responsibilities"/>
+  <testcase name="GodService Other Responsibilities log should call console.log with a formatted message" time="0.001" classname="GodService Other Responsibilities"/>
+  <testcase name="GodService Other Responsibilities updateConfig should log the action" time="0.002" classname="GodService Other Responsibilities"/>
+  <testcase name="GodService should be created" time="0.001" classname="GodService"/>
   <system-out>
     <![CDATA[Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: App component initialized.'
 ,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetching all users...'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetched all todos'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetched all todos'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetched all todos'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Added new todo: Write unit tests'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetched all todos'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetched all todos'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Deleted todo with id: 999'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetched all todos'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetched all todos'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Toggled todo with id: 3'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetched all todos'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Toggled todo with id: 3'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetched all todos'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetched all todos'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Toggled todo with id: 999'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetched all todos'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetched all todos'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Deleted todo with id: 3'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetched all todos'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetched all todos'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetching all users...'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetched all todos'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Adding user: David'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetched all todos'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Adding product: Monitor'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetched all todos'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetching all products...'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetched all todos'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Getting config for key: apiKey'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetched all todos'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetched all todos'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Updating config for key: timeout with value: 5000'
+,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetched all todos'
 
 ]]>
   </system-out>
