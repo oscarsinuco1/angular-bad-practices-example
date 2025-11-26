@@ -1,9 +1,53 @@
 <?xml version="1.0"?>
+<<<<<<< Updated upstream
 <testsuite name="Chrome Headless 142.0.0.0 (Linux 0.0.0)" package="" timestamp="2025-11-25T15:26:22" id="0" hostname="fedora" tests="1" errors="0" failures="0" time="0.064">
   <properties>
     <property name="browser.fullName" value="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/142.0.0.0 Safari/537.36"/>
   </properties>
   <testcase name="App should create the app" time="0.064" classname="App"/>
+=======
+<testsuite name="Chrome Headless 142.0.0.0 (Linux 0.0.0)" package="" timestamp="2025-11-26T15:05:14" id="0" hostname="runnervmg1sw1" tests="37" errors="0" failures="0" time="0.228">
+  <properties>
+    <property name="browser.fullName" value="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/142.0.0.0 Safari/537.36"/>
+  </properties>
+  <testcase name="GodService Todo Management should delete a todo and log the action" time="0.01" classname="GodService Todo Management"/>
+  <testcase name="GodService Todo Management should add a new todo and log the action" time="0.002" classname="GodService Todo Management"/>
+  <testcase name="GodService Todo Management should not change state or log when toggling a non-existent todo" time="0.003" classname="GodService Todo Management"/>
+  <testcase name="GodService Todo Management should toggle a todo from complete to incomplete and log the action" time="0.002" classname="GodService Todo Management"/>
+  <testcase name="GodService Todo Management should get all todos and log the action" time="0.002" classname="GodService Todo Management"/>
+  <testcase name="GodService Todo Management should toggle a todo from incomplete to complete and log the action" time="0.002" classname="GodService Todo Management"/>
+  <testcase name="GodService Todo Management should not fail when deleting a non-existent todo but still log" time="0.001" classname="GodService Todo Management"/>
+  <testcase name="GodService User Management should add a user and log the action" time="0.002" classname="GodService User Management"/>
+  <testcase name="GodService User Management should get users and log the action" time="0.002" classname="GodService User Management"/>
+  <testcase name="GodService should be created" time="0.001" classname="GodService"/>
+  <testcase name="GodService Product Management should add a product and log the action" time="0.001" classname="GodService Product Management"/>
+  <testcase name="GodService Product Management should get products and log the action" time="0.001" classname="GodService Product Management"/>
+  <testcase name="GodService Logging should log a message to the console" time="0.001" classname="GodService Logging"/>
+  <testcase name="GodService Configuration Management should get a config value and log the action" time="0.001" classname="GodService Configuration Management"/>
+  <testcase name="GodService Configuration Management should update a config value and log the action" time="0.001" classname="GodService Configuration Management"/>
+  <testcase name="TodoItemComponent should display the todo text" time="0.034" classname="TodoItemComponent"/>
+  <testcase name="TodoItemComponent should not have the completed class when todo is not completed" time="0.008" classname="TodoItemComponent"/>
+  <testcase name="TodoItemComponent should create" time="0.005" classname="TodoItemComponent"/>
+  <testcase name="TodoItemComponent should have the completed class when todo is completed" time="0.004" classname="TodoItemComponent"/>
+  <testcase name="TodoItemComponent getPriorityClass should return correct priority class for high priority" time="0.004" classname="TodoItemComponent getPriorityClass"/>
+  <testcase name="TodoItemComponent getPriorityClass should return correct priority class for low priority" time="0.004" classname="TodoItemComponent getPriorityClass"/>
+  <testcase name="TodoItemComponent getPriorityClass should return correct priority class for medium priority" time="0.004" classname="TodoItemComponent getPriorityClass"/>
+  <testcase name="TodoItemComponent should call onToggle when the checkbox is clicked, which calls godService.toggleTodo" time="0.013" classname="TodoItemComponent"/>
+  <testcase name="TodoItemComponent should call onDelete when the delete button is clicked, which calls godService.deleteTodo" time="0.004" classname="TodoItemComponent"/>
+  <testcase name="ImportantTodoSummaryComponent filterAndProcessTodos should filter by medium priority and incomplete status" time="0.019" classname="ImportantTodoSummaryComponent filterAndProcessTodos"/>
+  <testcase name="ImportantTodoSummaryComponent filterAndProcessTodos should return all todos sorted by id when no filters are applied" time="0.008" classname="ImportantTodoSummaryComponent filterAndProcessTodos"/>
+  <testcase name="ImportantTodoSummaryComponent filterAndProcessTodos should filter by high priority" time="0.006" classname="ImportantTodoSummaryComponent filterAndProcessTodos"/>
+  <testcase name="ImportantTodoSummaryComponent filterAndProcessTodos should return an empty array if there are no todos" time="0.006" classname="ImportantTodoSummaryComponent filterAndProcessTodos"/>
+  <testcase name="ImportantTodoSummaryComponent filterAndProcessTodos should filter by medium priority" time="0.006" classname="ImportantTodoSummaryComponent filterAndProcessTodos"/>
+  <testcase name="ImportantTodoSummaryComponent filterAndProcessTodos should filter by low priority" time="0.006" classname="ImportantTodoSummaryComponent filterAndProcessTodos"/>
+  <testcase name="ImportantTodoSummaryComponent filterAndProcessTodos should filter by completed status" time="0.006" classname="ImportantTodoSummaryComponent filterAndProcessTodos"/>
+  <testcase name="ImportantTodoSummaryComponent filterAndProcessTodos should filter by incomplete status" time="0.007" classname="ImportantTodoSummaryComponent filterAndProcessTodos"/>
+  <testcase name="ImportantTodoSummaryComponent should create" time="0.003" classname="ImportantTodoSummaryComponent"/>
+  <testcase name="ImportantTodoSummaryComponent UI and Computed Signals should display only high priority, incomplete todos" time="0.007" classname="ImportantTodoSummaryComponent UI and Computed Signals"/>
+  <testcase name="ImportantTodoSummaryComponent UI and Computed Signals should display a message when there are no todos at all" time="0.003" classname="ImportantTodoSummaryComponent UI and Computed Signals"/>
+  <testcase name="ImportantTodoSummaryComponent UI and Computed Signals should display a message when there are no important todos" time="0.003" classname="ImportantTodoSummaryComponent UI and Computed Signals"/>
+  <testcase name="App should create the app" time="0.036" classname="App"/>
+>>>>>>> Stashed changes
   <system-out>
     <![CDATA[Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: App component initialized.'
 ,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetching all users...'
