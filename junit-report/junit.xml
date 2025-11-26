@@ -1,9 +1,42 @@
 <?xml version="1.0"?>
-<testsuite name="Chrome Headless 142.0.0.0 (Linux 0.0.0)" package="" timestamp="2025-11-25T15:26:22" id="0" hostname="fedora" tests="1" errors="0" failures="0" time="0.064">
+<testsuite name="Chrome Headless 142.0.0.0 (Linux 0.0.0)" package="" timestamp="2025-11-26T14:36:31" id="0" hostname="runnervmg1sw1" tests="34" errors="0" failures="0" time="0.198">
   <properties>
     <property name="browser.fullName" value="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/142.0.0.0 Safari/537.36"/>
   </properties>
-  <testcase name="App should create the app" time="0.064" classname="App"/>
+  <testcase name="GodService Logging log should call console.log with a formatted message" time="0.009" classname="GodService Logging"/>
+  <testcase name="GodService Configuration Management getConfig should return a config value string and log the action" time="0.002" classname="GodService Configuration Management"/>
+  <testcase name="GodService Configuration Management updateConfig should log the action" time="0.001" classname="GodService Configuration Management"/>
+  <testcase name="GodService Product Management getProducts should return a list of products and log the action" time="0.002" classname="GodService Product Management"/>
+  <testcase name="GodService Product Management addProduct should log the action" time="0.002" classname="GodService Product Management"/>
+  <testcase name="GodService User Management getUsers should return a list of users and log the action" time="0.002" classname="GodService User Management"/>
+  <testcase name="GodService User Management addUser should log the action" time="0.009" classname="GodService User Management"/>
+  <testcase name="GodService should be created" time="0.002" classname="GodService"/>
+  <testcase name="GodService Todo Management getTodos should return the initial list of todos and log the action" time="0.002" classname="GodService Todo Management"/>
+  <testcase name="GodService Todo Management addTodo should add a new todo to the list and log the action" time="0.002" classname="GodService Todo Management"/>
+  <testcase name="GodService Todo Management toggleTodo should change the isCompleted status of a todo and log the action" time="0.001" classname="GodService Todo Management"/>
+  <testcase name="GodService Todo Management deleteTodo should remove a todo from the list and log the action" time="0.001" classname="GodService Todo Management"/>
+  <testcase name="TodoItemComponent onToggle should be triggered on checkbox change" time="0.03" classname="TodoItemComponent onToggle"/>
+  <testcase name="TodoItemComponent onToggle should call godService.toggleTodo with the correct id" time="0.005" classname="TodoItemComponent onToggle"/>
+  <testcase name="TodoItemComponent onDelete should call godService.deleteTodo with the correct id" time="0.004" classname="TodoItemComponent onDelete"/>
+  <testcase name="TodoItemComponent onDelete should be triggered on button click" time="0.005" classname="TodoItemComponent onDelete"/>
+  <testcase name="TodoItemComponent should create" time="0.004" classname="TodoItemComponent"/>
+  <testcase name="TodoItemComponent getPriorityClass should return &quot;priority-high&quot; for high priority todos and apply class" time="0.004" classname="TodoItemComponent getPriorityClass"/>
+  <testcase name="TodoItemComponent getPriorityClass should return &quot;priority-medium&quot; for medium priority todos and apply class" time="0.004" classname="TodoItemComponent getPriorityClass"/>
+  <testcase name="TodoItemComponent getPriorityClass should return &quot;priority-low&quot; for low priority todos and apply class" time="0.004" classname="TodoItemComponent getPriorityClass"/>
+  <testcase name="TodoItemComponent should have mat-checkbox checked status based on todo.isCompleted" time="0.005" classname="TodoItemComponent"/>
+  <testcase name="TodoItemComponent should display the todo text" time="0.004" classname="TodoItemComponent"/>
+  <testcase name="TodoItemComponent should apply &quot;completed&quot; class when todo is completed" time="0.005" classname="TodoItemComponent"/>
+  <testcase name="App should create the app" time="0.041" classname="App"/>
+  <testcase name="ImportantTodoSummaryComponent filterAndProcessTodos should filter by completion status (false)" time="0.009" classname="ImportantTodoSummaryComponent filterAndProcessTodos"/>
+  <testcase name="ImportantTodoSummaryComponent filterAndProcessTodos should filter by completion status (true)" time="0.006" classname="ImportantTodoSummaryComponent filterAndProcessTodos"/>
+  <testcase name="ImportantTodoSummaryComponent filterAndProcessTodos should return all todos sorted by id if no filters are provided" time="0.006" classname="ImportantTodoSummaryComponent filterAndProcessTodos"/>
+  <testcase name="ImportantTodoSummaryComponent filterAndProcessTodos should filter by priority" time="0.005" classname="ImportantTodoSummaryComponent filterAndProcessTodos"/>
+  <testcase name="ImportantTodoSummaryComponent filterAndProcessTodos should filter by both priority and completion status" time="0.005" classname="ImportantTodoSummaryComponent filterAndProcessTodos"/>
+  <testcase name="ImportantTodoSummaryComponent importantTodos computed signal should be empty if there are no high-priority, incomplete todos" time="0.002" classname="ImportantTodoSummaryComponent importantTodos computed signal"/>
+  <testcase name="ImportantTodoSummaryComponent importantTodos computed signal should only contain high-priority, incomplete todos" time="0.005" classname="ImportantTodoSummaryComponent importantTodos computed signal"/>
+  <testcase name="ImportantTodoSummaryComponent Template rendering should display a list of app-todo-item when there are important todos" time="0.006" classname="ImportantTodoSummaryComponent Template rendering"/>
+  <testcase name="ImportantTodoSummaryComponent Template rendering should display a message when there are no important todos" time="0.002" classname="ImportantTodoSummaryComponent Template rendering"/>
+  <testcase name="ImportantTodoSummaryComponent should create" time="0.002" classname="ImportantTodoSummaryComponent"/>
   <system-out>
     <![CDATA[Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: App component initialized.'
 ,Chrome Headless 142.0.0.0 (Linux 0.0.0) LOG: '[GodService Log]: Fetching all users...'
