@@ -16,7 +16,7 @@ load_dotenv()
 
 SONAR_API_URL = "https://sonarcloud.io/api/issues/search"
 SONAR_TOKEN = os.getenv('SONAR_TOKEN')  # Fallback for local testing
-GITHUB_PAT = os.getenv('GITHUB_PAT')  # Personal Access Token for triggering CI
+GH_TOKEN = os.getenv('GH_TOKEN')  # Personal Access Token for triggering CI
 PROJECT_KEY = "oscarsinuco1_angular-bad-practices-example"
 BRANCH_NAME = "sonar-fix"
 
@@ -360,7 +360,7 @@ def dispatch_ci_workflow():
 
         headers = {
             'Accept': 'application/vnd.github.v3+json',
-            'Authorization': f'token {GITHUB_PAT}'
+            'Authorization': f'token {GH_TOKEN}'
         }
 
         response = requests.post(url, headers=headers, json=data)
@@ -378,10 +378,10 @@ def create_and_push_branch(modified_files):
         result = subprocess.run(['git', 'remote', 'get-url', 'origin'], capture_output=True, text=True, check=True)
         repo_url = result.stdout.strip()
 
-        if GITHUB_PAT:
+        if GH_TOKEN:
             # Replace https://github.com/ with https://PAT@github.com/
             if 'https://github.com/' in repo_url:
-                repo_url = repo_url.replace('https://github.com/', f'https://{GITHUB_PAT}@github.com/')
+                repo_url = repo_url.replace('https://github.com/', f'https://{GH_TOKEN}@github.com/')
             # Set the remote URL with PAT
             subprocess.run(['git', 'remote', 'set-url', 'origin', repo_url], check=True)
 
