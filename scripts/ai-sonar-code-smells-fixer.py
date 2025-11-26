@@ -379,9 +379,11 @@ def create_and_push_branch(modified_files):
         repo_url = result.stdout.strip()
 
         if GH_TOKEN:
+            print(f'Se encontró el token, procediendo al cambio')
             # Replace https://github.com/ with https://PAT@github.com/
             if 'https://github.com/' in repo_url:
                 repo_url = repo_url.replace('https://github.com/', f'https://{GH_TOKEN}@github.com/')
+                print(f'Cambio de origin realizado')
             # Set the remote URL with PAT
             subprocess.run(['git', 'remote', 'set-url', 'origin', repo_url], check=True)
 
